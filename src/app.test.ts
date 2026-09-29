@@ -1,16 +1,26 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { profile, resetApp, signIn } from '../tests/helpers.js';
+import { event, feed, profile, resetApp, signIn } from '../tests/helpers.js';
 import { startApp } from './app.js';
 import { KEY } from './lib/storage.js';
 import { render } from './render.js';
 import { go } from './router.js';
+import { setFeed } from './services/events.js';
 import { loadGuest } from './state/session.js';
 import { S } from './state/state.js';
 import type { Profile, RouteName } from './types.js';
 
 let root: HTMLElement;
 
+const inDays = (n: number) => new Date(Date.now() + n * 864e5).toISOString();
+const testFeed = () =>
+  feed([
+    event({ id: 'cph-1', title: 'Harbour walk', startsAt: inDays(3) }),
+    event({ id: 'cph-2', title: 'Jazz night', category: 'music', startsAt: inDays(5) }),
+    event({ id: 'ode-1', title: 'Odense food market', city: 'odense', category: 'food', startsAt: inDays(4) }),
+  ]);
+
 beforeAll(() => {
+  vi.stubGlobal('fetch', () => Promise.resolve(new Response(JSON.stringify(testFeed()))));
   root = document.createElement('div');
   root.id = 'app';
   document.body.append(root);
@@ -19,6 +29,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   resetApp();
+  setFeed(testFeed());
   location.hash = '';
   root.innerHTML = '';
   S.route = { name: 'home' };
@@ -46,22 +57,61 @@ describe('first visit', () => {
 });
 
 describe('plan builder', () => {
-  it('turns four answers into a saved profile and opens the Journey', () => {
+  const answer = (value: string) => click(`[data-act="opt"][data-name="onb"][data-value="${value}"]`);
+
+  it('turns the answers into a saved profile and opens the Journey', () => {
     vi.useFakeTimers();
     go('start');
-    for (const answer of ['work', 'eu-eea', 'aarhus', 'no']) click(`[data-act="opt"][data-value="${answer}"]`);
+    for (const value of ['work', 'offer', 'eu-eea', 'aarhus', 'soon', 'searching', 'solo']) answer(value);
+    expect(root.textContent).toContain('Your plan is ready to build');
+    const name = root.querySelector<HTMLInputElement>('#onb-name');
+    if (!name) throw new Error('No name field');
+    name.value = 'Sofia';
+    name.dispatchEvent(new Event('input', { bubbles: true }));
+    click('[data-act="onb-finish"]');
     expect(S.profile).toEqual({
       move_reason: 'work',
       residency_group: 'eu-eea',
       city: 'aarhus',
       has_cpr: false,
       arrival_date: null,
+      stage: 'soon',
+      housing: 'searching',
+      household: 'solo',
+      study_type: null,
+      job_status: 'offer',
+      name: 'Sofia',
       onboarding_completed: true,
     });
-    vi.advanceTimersByTime(500);
+    expect(heading()).toBe('Building your plan, Sofia…');
+    vi.advanceTimersByTime(1500);
     expect(heading()).toBe('Journey');
     expect(location.hash).toBe('#journey');
+    expect(root.textContent).toContain('Velkommen, Sofia!');
     expect(localStorage.getItem(KEY.profile(S.guestId ?? ''))).toContain('aarhus');
+  });
+
+  it('asks follow-up questions only when they apply, and returns to the review after a change', () => {
+    go('start');
+    answer('student');
+    expect(root.textContent).toContain('What kind of studies?');
+    answer('degree');
+    for (const value of ['non-eu', 'odense', 'arrived', 'settled', 'partner']) answer(value);
+    // Only people who have arrived are asked about a CPR number.
+    expect(root.textContent).toContain('Do you already have a CPR number?');
+    answer('yes');
+    expect(root.textContent).toContain('Your plan is ready to build');
+    click('[data-act="onb-jump"][data-i="0"]');
+    answer('family');
+    expect(root.textContent).toContain('Your plan is ready to build');
+    expect(S.onb.draft.moveReason).toBe('family');
+  });
+
+  it('answers with the number keys', () => {
+    go('start');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '2' }));
+    expect(S.onb.draft.moveReason).toBe('work');
+    expect(root.textContent).toContain('Do you have a job in Denmark yet?');
   });
 });
 
@@ -103,10 +153,30 @@ describe('with a plan', () => {
     expect(S.askHistory).toHaveLength(2);
   });
 
+  it('marks a step as not relevant and brings it back', () => {
+    const [first] = S.plan;
+    go('step', { id: first.id });
+    click('[data-act="step-skip"]');
+    expect(S.plan.find(s => s.id === first.id)?.skipped).toBe(true);
+    expect(root.textContent).toContain('Add back to my plan');
+    click('[data-act="step-skip"]');
+    expect(S.plan.find(s => s.id === first.id)?.skipped).toBe(false);
+  });
+
+  it('shows events for the chosen city', () => {
+    go('events');
+    expect(root.textContent).toContain('Harbour walk');
+    expect(root.textContent).not.toContain('Odense food market');
+    click('[data-act="ev-city"][data-id="odense"]');
+    expect(root.textContent).toContain('Odense food market');
+    expect(root.textContent).not.toContain('Harbour walk');
+  });
+
   it('saves and unsaves events', () => {
     go('events');
     click('.ev-save');
     expect(S.saved).toHaveLength(1);
+    expect(S.saved[0].id).toBe('cph-1');
     expect(root.querySelector('[data-act="ev-saved"]')?.textContent).toContain('1');
     click('.ev-save');
     expect(S.saved).toHaveLength(0);
@@ -119,6 +189,28 @@ describe('with a plan', () => {
     click('[data-act="pe-save"]');
     expect(S.profile?.city).toBe('odense');
     expect(root.textContent).toContain('Odense');
+  });
+
+  it('picks an emoji profile picture', () => {
+    go('profile');
+    click('[data-act="avatar-open"]');
+    click('[data-act="avatar-emoji"][aria-label="Fox"]');
+    click('[data-act="avatar-color"][data-value="sky"]');
+    expect(S.avatar).toEqual({ kind: 'emoji', value: '🦊', color: 'sky' });
+    expect(root.querySelector('.profile-link .av-emoji')?.textContent).toBe('🦊');
+    click('[data-act="avatar-remove"]');
+    expect(S.avatar).toBeNull();
+  });
+
+  it('filters the housing guide by city and type', () => {
+    go('housing');
+    expect(heading()).toBe('Find a home in Copenhagen');
+    click('[data-act="hs-city"][data-id="aarhus"]');
+    expect(heading()).toBe('Find a home in Aarhus');
+    const kind = root.querySelector<HTMLElement>('[data-act="hs-kind"]:not([data-id="all"])');
+    if (!kind) throw new Error('No type filter');
+    kind.click();
+    expect(root.querySelectorAll('.res-section')).toHaveLength(1);
   });
 
   it('forgets the guest when they leave', () => {
@@ -142,14 +234,26 @@ describe('every screen renders cleanly for every kind of newcomer', () => {
   const moves: Profile['move_reason'][] = ['student', 'work', 'other'];
   const groups: Profile['residency_group'][] = ['eu-eea', 'non-eu'];
   const cities: Profile['city'][] = ['copenhagen', 'aarhus', 'odense', 'aalborg', 'other'];
-  const screens: RouteName[] = ['today', 'journey', 'ask', 'events', 'profile'];
+  const screens: RouteName[] = ['today', 'journey', 'ask', 'events', 'housing', 'profile'];
 
   for (const move_reason of moves)
     for (const residency_group of groups)
       for (const city of cities)
         for (const has_cpr of [true, false])
           it(`${move_reason} / ${residency_group} / ${city} / cpr ${has_cpr}`, () => {
-            signIn(profile({ move_reason, residency_group, city, has_cpr, arrival_date: '2026-09-01' }));
+            signIn(
+              profile({
+                move_reason,
+                residency_group,
+                city,
+                has_cpr,
+                arrival_date: '2026-09-01',
+                study_type: move_reason === 'student' ? 'degree' : null,
+                job_status: move_reason === 'work' ? 'looking' : null,
+                housing: has_cpr ? 'settled' : 'temporary',
+                household: has_cpr ? 'partner-kids' : 'solo',
+              }),
+            );
             for (const screen of screens) {
               go(screen);
               expect(heading(), screen).toBeTruthy();

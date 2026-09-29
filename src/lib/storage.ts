@@ -42,6 +42,8 @@ export const KEY = {
   active: 'hej-denmark-active-guest',
   profile: (id: string) => 'hej-denmark-guest-profile-' + id,
   done: (id: string) => 'hej-denmark-guest-completions-' + id,
+  skipped: (id: string) => 'hej-denmark-guest-skipped-' + id,
+  avatar: (id: string) => 'hej-denmark-guest-avatar-' + id,
   checklist: (id: string) => 'hej-denmark-step-checklist-guest-' + id,
   reminders: (id: string) => 'hej-denmark-reminders-guest-' + id,
   saved: (id: string) => 'hej-denmark-saved-events-guest-' + id,

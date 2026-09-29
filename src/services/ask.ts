@@ -1,11 +1,13 @@
 import type { Sampler } from '../global.js';
 import { buildTurns, offlineAnswer, parseAnswer, SAMPLE_OFF, stripSources } from '../lib/assistant.js';
 import { isWide, uid } from '../lib/dom.js';
+import { eventsIn } from '../lib/event-feed.js';
+import { eventCity } from '../lib/events.js';
 import { md } from '../lib/markdown.js';
 import { render } from '../render.js';
 import { saveGuestData } from '../state/session.js';
 import { S } from '../state/state.js';
-import type { Answer, AskMessage, Profile } from '../types.js';
+import type { Answer, AskMessage, EventItem, Profile } from '../types.js';
 import { askThreadHTML, scrollChat } from '../views/ask.js';
 
 let samplePromise: Promise<Sampler | null> | null = null;
@@ -25,11 +27,14 @@ export function getSample(): Promise<Sampler | null> {
 const errorCode = (e: unknown): string | undefined =>
   e && typeof e === 'object' && 'code' in e ? String((e as { code: unknown }).code) : undefined;
 
+const cityEventsFor = (profile: Profile): EventItem[] => eventsIn(S.events.feed, eventCity(profile.city));
+
 async function answerQuestion(question: string, prior: AskMessage[], profile: Profile): Promise<Answer> {
+  const events = cityEventsFor(profile);
   const sample = S.sampleOff ? null : await getSample();
-  if (!sample) return offlineAnswer(question, profile, S.plan);
+  if (!sample) return offlineAnswer(question, profile, S.plan, events);
   try {
-    const { text } = await sample(buildTurns(question, prior, profile, S.plan), {
+    const { text } = await sample(buildTurns(question, prior, profile, S.plan, events), {
       cache: false,
       onText: ({ text }) => streamTo(stripSources(text)),
     });
@@ -38,7 +43,7 @@ async function answerQuestion(question: string, prior: AskMessage[], profile: Pr
     const code = errorCode(e);
     if (code && SAMPLE_OFF.has(code)) {
       S.sampleOff = true;
-      return offlineAnswer(question, profile, S.plan);
+      return offlineAnswer(question, profile, S.plan, events);
     }
     throw e;
   }

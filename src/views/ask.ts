@@ -1,4 +1,4 @@
-import { CITY_LABELS, MOVE_LABELS, RES_LABELS } from '../data/labels.js';
+import { CITY_LABELS, HOUSEHOLD_LABELS, HOUSING_LABELS, MOVE_LABELS, RES_LABELS } from '../data/labels.js';
 import { HELP_LINKS } from '../data/links.js';
 import { promptsFor } from '../data/prompts.js';
 import { esc, ext, icon, isOfficial } from '../lib/dom.js';
@@ -60,7 +60,9 @@ export function pageAsk() {
           <div style="margin-top:8px">
             <div class="kv"><span class="muted">City</span><span class="strong">${esc(CITY_LABELS[p.city])}</span></div>
             <div class="kv"><span class="muted">Moving for</span><span class="strong">${esc(MOVE_LABELS[p.move_reason])}</span></div>
-            <div class="kv"><span class="muted">Moving from</span><span class="strong">${esc(RES_LABELS[p.residency_group])}</span></div>
+            <div class="kv"><span class="muted">Citizenship</span><span class="strong">${esc(RES_LABELS[p.residency_group])}</span></div>
+            <div class="kv"><span class="muted">Home</span><span class="strong">${esc(HOUSING_LABELS[p.housing])}</span></div>
+            <div class="kv"><span class="muted">Moving with</span><span class="strong">${esc(HOUSEHOLD_LABELS[p.household])}</span></div>
             <div class="kv"><span class="muted">CPR number</span><span class="strong">${p.has_cpr ? 'Ready' : 'Not yet'}</span></div>
             <div class="kv"><span class="muted">Next step</span><span class="strong" style="text-align:right">${esc(next ? next.title : 'All done')}</span></div>
           </div>

@@ -1,180 +1,6 @@
-import type { CityId, EventCategory, EventRow, WhenFilter } from '../types.js';
+import type { CityId, EventCategory, WhenFilter } from '../types.js';
 import type { IconName } from './icons.js';
 
-// Event listings from the app's feed (KultuNaut), saved on 27 September 2026.
-export const KN = 'https://www.kultunaut.dk/perl/arrmore/type-nynaut/UK?ArrNr=';
-export const EVENT_SNAPSHOT: Record<string, EventRow[]> = {
-  copenhagen: [
-    [
-      '19561419',
-      'When Christian Dior visited Magasin',
-      '2026-10-25T12:00:00Z',
-      'Sun, 25 Oct',
-      '13.00',
-      'Magasin du Nord Museum, Copenhagen',
-      'culture',
-    ],
-    [
-      '19631887',
-      'Slowlooking: Space & form',
-      '2026-11-25T16:30:00Z',
-      'Wed, 25 Nov',
-      '16:30',
-      'Rosenborg Slot, Copenhagen',
-      'other',
-    ],
-    [
-      '18857495',
-      'Degas’s obsession',
-      '2026-11-29T12:00:00Z',
-      'Sun, 29 Nov',
-      '13.00',
-      'Glyptoteket, Copenhagen',
-      'culture',
-    ],
-    [
-      '20024929',
-      'Classical Mini Concerts',
-      '2026-12-06T00:30:00Z',
-      'Sun, 6 Dec',
-      '00:30',
-      'Kulturhuset Krudttønden, Copenhagen',
-      'music',
-    ],
-    [
-      '19827853',
-      'Body Temple - Mindful Cuddling',
-      '2026-12-09T18:30:00Z',
-      'Wed, 9 Dec',
-      '18:30',
-      'Chai Tantrazone, Copenhagen',
-      'other',
-    ],
-    [
-      '19505381',
-      'Melting Monday',
-      '2026-12-14T18:15:00Z',
-      'Mon, 14 Dec',
-      '18:15',
-      'C.H.A.I. Copenhagen Heart Awakening Institute, Copenhagen',
-      'learning',
-    ],
-    [
-      '18569596',
-      'Vølva’s omen - New Viking experience',
-      '2027-12-31T12:00:00Z',
-      'Fri, 31 Dec',
-      '13.00',
-      'Nationalmuseet, Copenhagen',
-      'culture',
-    ],
-    [
-      '18476910',
-      'Go on a puzzle hunt with Theodor',
-      '2027-12-31T12:00:00Z',
-      'Fri, 31 Dec',
-      '13.00',
-      'Magasin du Nord Museum, Copenhagen',
-      'culture',
-    ],
-  ],
-  aarhus: [
-    [
-      '19957034',
-      'Italian evening | AARHUS',
-      '2026-10-07T17:30:00Z',
-      'Wed, 7 Oct',
-      '17:30',
-      'Salling Rooftop, Aarhus',
-      'food',
-    ],
-    [
-      '20356134',
-      'Quotes from the Ice',
-      '2026-10-28T12:00:00Z',
-      'Wed, 28 Oct',
-      '13.00',
-      'Dokk1/Aarhus Hovedbibliotek, Aarhus',
-      'culture',
-    ],
-    [
-      '19601927',
-      'Guided Harbor Cruise',
-      '2026-10-31T12:00:00Z',
-      'Sat, 31 Oct',
-      '13.00',
-      'Aarhus Havnerundfart, Aarhus',
-      'outdoors',
-    ],
-    [
-      '19696971',
-      'Art on the brain - researchers’ own images of the brain universe',
-      '2026-10-31T12:00:00Z',
-      'Sat, 31 Oct',
-      '13.00',
-      'Godsbanen, Aarhus',
-      'culture',
-    ],
-    [
-      '20236056',
-      'On Grief, Waiting, and the Things We Can’t Hold Onto',
-      '2026-10-31T18:30:00Z',
-      'Sat, 31 Oct',
-      '18:30',
-      'Åby Bibliotek, Aarhus',
-      'other',
-    ],
-  ],
-  odense: [
-    [
-      '19839668',
-      'The Dog with the Top of the Hair - Illustrations of Greenlandic Legends',
-      '2026-09-27T12:00:00Z',
-      'Sun, 27 Sept',
-      '14.00',
-      'Nordatlantisk Hus, Odense',
-      'culture',
-    ],
-    [
-      '20378297',
-      'Properties of Ice',
-      '2026-10-19T06:30:00Z',
-      'Mon, 19 Oct',
-      '06:30',
-      'Nordatlantisk Hus, Odense',
-      'culture',
-    ],
-    [
-      '19802302',
-      'Life and living landscapes - stories from the Faroe Islands',
-      '2026-11-08T16:00:00Z',
-      'Sun, 8 Nov',
-      '16:00',
-      'Nordatlantisk Hus, Odense',
-      'culture',
-    ],
-    [
-      '19360214',
-      'Tour & Beer Tasting at Anarchist Brewery',
-      '2026-12-19T12:00:00Z',
-      'Sat, 19 Dec',
-      '13.00',
-      'Anarkist - Beer & Foodlab, Odense',
-      'food',
-    ],
-  ],
-  aalborg: [
-    [
-      '19956950',
-      'Italian evening | Aalborg',
-      '2026-10-07T17:30:00Z',
-      'Wed, 7 Oct',
-      '17:30',
-      'Salling Rooftop Aalborg, Aalborg',
-      'food',
-    ],
-  ],
-};
 export const EVENT_CITIES: { id: CityId; label: string }[] = [
   { id: 'copenhagen', label: 'Copenhagen' },
   { id: 'aarhus', label: 'Aarhus' },
@@ -220,3 +46,41 @@ export const CAT_ICONS: Record<EventCategory, IconName> = {
   family: 'Baby',
   other: 'CalendarDays',
 };
+
+/** Real, lasting places to find events and meet people, shown next to the listings and when a city has none. */
+export interface MeetIdea {
+  title: string;
+  text: string;
+  url: string;
+  icon: IconName;
+  /** The cities it's for. Missing means everywhere. */
+  cities?: CityId[];
+}
+
+export const MEET_IDEAS: MeetIdea[] = [
+  {
+    title: 'International House Copenhagen',
+    text: 'Free events, talks and networking for internationals.',
+    url: 'https://ihcph.kk.dk/',
+    icon: 'Building2',
+    cities: ['copenhagen'],
+  },
+  {
+    title: 'Your local library',
+    text: 'Danish libraries host free talks, language cafés and workshops. Look for “arrangementer”.',
+    url: 'https://lifeindenmark.borger.dk/',
+    icon: 'Library',
+  },
+  {
+    title: 'KultuNaut',
+    text: 'Denmark’s big what’s-on guide, with listings for every town.',
+    url: 'https://www.kultunaut.dk/UK/',
+    icon: 'CalendarDays',
+  },
+  {
+    title: 'VisitDenmark events',
+    text: 'Festivals and big events across the country.',
+    url: 'https://www.visitdenmark.com/denmark/things-do/events',
+    icon: 'Ticket',
+  },
+];

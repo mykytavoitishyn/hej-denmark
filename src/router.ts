@@ -3,12 +3,13 @@ import { render } from './render.js';
 import { S } from './state/state.js';
 import type { Route, RouteName } from './types.js';
 
-type HashRouteName = 'home' | 'start' | 'login' | 'events' | 'today' | 'journey' | 'ask' | 'profile';
+type HashRouteName = 'home' | 'start' | 'login' | 'events' | 'housing' | 'today' | 'journey' | 'ask' | 'profile';
 const HASH_ROUTES: readonly HashRouteName[] = [
   'home',
   'start',
   'login',
   'events',
+  'housing',
   'today',
   'journey',
   'ask',
@@ -29,7 +30,7 @@ export function parseHash(): Route | null {
 export function resolveRoute(r: Route | null): Route {
   if (!r) return S.profile ? { name: 'today' } : { name: 'home' };
   if (NEEDS_PROFILE.includes(r.name) && !S.profile) {
-    S.gateNote = 'Build your plan first. It takes four quick questions.';
+    S.gateNote = 'Build your plan first. It takes about a minute.';
     return { name: 'start' };
   }
   if (r.name === 'start' && S.profile) return { name: 'today' };

@@ -1,17 +1,37 @@
-import { CITY_LABELS, MOVE_LABELS, RES_LABELS } from '../data/labels.js';
+import {
+  CITY_LABELS,
+  HOUSEHOLD_LABELS,
+  HOUSING_LABELS,
+  JOB_LABELS,
+  MOVE_LABELS,
+  RES_LABELS,
+  STAGE_LABELS,
+  STUDY_LABELS,
+} from '../data/labels.js';
 import { OFFICIAL } from '../data/links.js';
 import { STEPS } from '../data/plan.js';
-import type { Answer, AskMessage, CityId, PlanStep, Profile, Source, Turn } from '../types.js';
+import type { Answer, AskMessage, CityId, EventItem, PlanStep, Profile, Source, Turn } from '../types.js';
 import { hostOf, isOfficial } from './dom.js';
-import { cityEvents, eventCity } from './events.js';
+import { dateLabel, timeLabel } from './event-feed.js';
 import { nextStep, planSummary, prio } from './plan.js';
 
-/** Builds the conversation sent to the language model: instructions and context first, then recent history, then the question. */
-export function buildTurns(question: string, prior: AskMessage[], p: Profile, plan: PlanStep[]): Turn[] {
-  const city = eventCity(p.city);
-  const events = cityEvents(city)
-    .events.slice(0, 6)
-    .map(e => `- ${e.title} (${e.dateLabel} · ${e.timeLabel}, ${e.location})`)
+const eventLine = (e: EventItem): string =>
+  `${e.title} (${dateLabel(e)} · ${timeLabel(e)}${e.venue ? `, ${e.venue}` : ''})`;
+
+/**
+ * Builds the conversation sent to the language model: instructions and context first, then recent history,
+ * then the question. `events` are the upcoming listings in the person's city.
+ */
+export function buildTurns(
+  question: string,
+  prior: AskMessage[],
+  p: Profile,
+  plan: PlanStep[],
+  events: EventItem[] = [],
+): Turn[] {
+  const eventLines = events
+    .slice(0, 6)
+    .map(e => `- ${eventLine(e)}`)
     .join('\n');
   const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',
@@ -39,11 +59,11 @@ End your reply with one final line that starts with "SOURCES:" followed by up to
 ${OFFICIAL.map(([u, t]) => `${u} (${t})`).join('\n')}
 
 Today: ${today}
-Profile: reason for moving: ${MOVE_LABELS[p.move_reason]}; moving from: ${RES_LABELS[p.residency_group]}; home city: ${p.city === 'other' ? 'another Danish city' : CITY_LABELS[p.city]}; CPR number: ${p.has_cpr ? 'yes' : 'not yet'}; arrival date: ${p.arrival_date || 'not set'}.
+Profile: ${p.name ? `name: ${p.name}; ` : ''}reason for moving: ${MOVE_LABELS[p.move_reason]}${p.study_type ? ` (${STUDY_LABELS[p.study_type]})` : ''}${p.job_status ? ` (${JOB_LABELS[p.job_status]})` : ''}; citizenship: ${RES_LABELS[p.residency_group]}; home city: ${p.city === 'other' ? 'another Danish city' : CITY_LABELS[p.city]}; where they are in the move: ${STAGE_LABELS[p.stage]}; home: ${HOUSING_LABELS[p.housing]}; moving with: ${HOUSEHOLD_LABELS[p.household]}; CPR number: ${p.has_cpr ? 'yes' : 'not yet'}; arrival date: ${p.arrival_date || 'not set'}.
 Their plan, in order:
 ${planLines}
 Events in ${p.city === 'other' ? 'Denmark' : CITY_LABELS[p.city]}:
-${events || '- none listed'}`;
+${eventLines || '- none listed'}`;
   return [
     { role: 'user', content: rules },
     ...prior.slice(-8).map(m => ({ role: m.role, content: m.text })),
@@ -76,7 +96,7 @@ function officeFor(city: CityId) {
   return STEPS.find(s => s.slug === 'city-services')?.office_by_city[city] || null;
 }
 /** Answers common questions from built-in guidance when no language model is available. */
-export function offlineAnswer(q: string, p: Profile, plan: PlanStep[]): Answer {
+export function offlineAnswer(q: string, p: Profile, plan: PlanStep[], events: EventItem[] = []): Answer {
   const t = q.toLowerCase();
   const cityName = p.city === 'other' ? 'your city' : CITY_LABELS[p.city];
   const office = officeFor(p.city);
@@ -171,10 +191,10 @@ export function offlineAnswer(q: string, p: Profile, plan: PlanStep[]): Answer {
     [
       /event|weekend|what'?s on|what’s on|things to do|concert|museum/,
       () => {
-        const list = cityEvents(eventCity(p.city)).events.slice(0, 3);
+        const list = events.filter(e => e.kind === 'event').slice(0, 3);
         return {
           answer: list.length
-            ? `Coming up in ${p.city === 'other' ? 'Denmark' : cityName}:\n${list.map(e => `- **${e.title}**, ${e.dateLabel} · ${e.timeLabel}, ${e.location}`).join('\n')}\n\nSee more and save favourites in Events.`
+            ? `Coming up in ${p.city === 'other' ? 'Denmark' : cityName}:\n${list.map(e => `- **${e.title}**, ${dateLabel(e)} · ${timeLabel(e)}${e.venue ? `, ${e.venue}` : ''}`).join('\n')}\n\nSee more and save favourites in Events.`
             : 'I don’t see upcoming events right now. Try Events for another city or date.',
           sources: [src('https://www.kultunaut.dk/UK/')],
         };

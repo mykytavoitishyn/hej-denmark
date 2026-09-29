@@ -4,11 +4,15 @@ import { S } from './state/state.js';
 import { pageAsk, scrollChat } from './views/ask.js';
 import { pageEvents } from './views/events.js';
 import { pageHome } from './views/home.js';
+import { pageHousing } from './views/housing.js';
 import { pageJourney, pageStep } from './views/journey.js';
 import { footer, header } from './views/layout.js';
 import { pageProfile } from './views/profile.js';
 import { pageLogin, pageSaving, pageStart } from './views/start.js';
 import { pageToday } from './views/today.js';
+
+/** The page last drawn. The entrance animation plays only when this changes, not on every re-render. */
+let lastPage = '';
 
 export function render(): void {
   const root = document.getElementById('app');
@@ -43,13 +47,23 @@ export function render(): void {
     case 'events':
       page = pageEvents();
       break;
+    case 'housing':
+      page = pageHousing();
+      break;
     case 'profile':
       page = pageProfile();
       break;
     default:
       page = pageHome();
   }
-  root.innerHTML = header() + `<main id="main" class="site-main" tabindex="-1">${page}</main>` + footer();
+  // On wide screens a step opens inside the Journey, so moving between steps isn't a new page.
+  const pageKey = r.name === 'step' ? (isWide() ? 'journey' : `step-${r.id}`) : r.name;
+  const entering = pageKey !== lastPage;
+  lastPage = pageKey;
+  root.innerHTML =
+    header() +
+    `<main id="main" class="site-main${entering ? ' page-enter' : ''}" tabindex="-1">${page}</main>` +
+    footer();
   const prog = root.querySelector<SVGCircleElement>('.ring-prog');
   if (prog) {
     const to = prog.dataset.to ?? '';

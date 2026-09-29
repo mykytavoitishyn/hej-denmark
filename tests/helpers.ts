@@ -1,7 +1,7 @@
 import { store } from '../src/lib/storage.js';
 import { createGuest, saveGuestData, afterProfileChange } from '../src/state/session.js';
 import { S, createInitialState } from '../src/state/state.js';
-import type { EventItem, Profile } from '../src/types.js';
+import type { EventFeed, EventItem, Profile } from '../src/types.js';
 
 export const profile = (over: Partial<Profile> = {}): Profile => ({
   move_reason: 'work',
@@ -9,6 +9,12 @@ export const profile = (over: Partial<Profile> = {}): Profile => ({
   city: 'copenhagen',
   has_cpr: false,
   arrival_date: null,
+  stage: 'arrived',
+  housing: 'searching',
+  household: 'solo',
+  study_type: null,
+  job_status: 'offer',
+  name: '',
   onboarding_completed: true,
   ...over,
 });
@@ -16,15 +22,25 @@ export const profile = (over: Partial<Profile> = {}): Profile => ({
 export const event = (over: Partial<EventItem> = {}): EventItem => ({
   id: 'kultunaut-1',
   title: 'Harbour walk',
-  startsAt: '2026-10-25T12:00:00Z',
+  startsAt: '2026-10-25T12:00:00.000Z',
   endsAt: null,
-  dateLabel: 'Sun, 25 Oct',
-  timeLabel: '13.00',
-  location: 'Copenhagen',
+  allDay: false,
+  kind: 'event',
+  venue: 'Nyhavn, Copenhagen',
+  city: 'copenhagen',
   category: 'outdoors',
-  sourceUrl: 'https://www.kultunaut.dk/perl/arrmore/type-nynaut/UK?ArrNr=1',
+  url: 'https://www.kultunaut.dk/perl/arrmore/type-nynaut/UK?ArrNr=1',
+  sourceId: 'kultunaut',
   sourceName: 'KultuNaut',
-  isFallback: false,
+  isFree: null,
+  ...over,
+});
+
+export const feed = (events: EventItem[] = [event()], over: Partial<EventFeed> = {}): EventFeed => ({
+  version: 1,
+  generatedAt: '2026-09-29T06:00:00.000Z',
+  sources: [{ id: 'kultunaut', name: 'KultuNaut', url: 'https://www.kultunaut.dk/UK/' }],
+  events,
   ...over,
 });
 

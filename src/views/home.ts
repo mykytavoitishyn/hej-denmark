@@ -19,8 +19,20 @@ const TERMS = [
 ];
 function previewCard() {
   const plan = planFor(
-    { move_reason: 'work', residency_group: 'eu-eea', city: 'copenhagen', has_cpr: false, arrival_date: null },
-    new Set([2]),
+    {
+      move_reason: 'work',
+      residency_group: 'eu-eea',
+      city: 'copenhagen',
+      has_cpr: false,
+      arrival_date: null,
+      stage: 'arrived',
+      housing: 'searching',
+      household: 'solo',
+      study_type: null,
+      job_status: 'offer',
+      name: 'Sofia',
+    },
+    new Set([4]),
   );
   const phases = journeyPhases(plan).slice(0, 2);
   const done = plan.filter(s => s.completed).length;
@@ -68,6 +80,14 @@ export function pageHome() {
       'Ask a question',
     ],
     [
+      'House',
+      'Housing',
+      'Find a home, safely',
+      'Student housing, rental sites, Facebook groups, your rights as a tenant and how to spot a scam, city by city.',
+      'housing',
+      'Open the housing guide',
+    ],
+    [
       'UsersRound',
       'Events',
       'Meet people in your city',
@@ -79,7 +99,7 @@ export function pageHome() {
   const how = [
     [
       'Tell us who you are',
-      'Four questions: why you’re moving, where you’re from, your city and whether you have a CPR number.',
+      'About a minute: why you’re moving, your citizenship, your city, your home and who’s coming with you.',
     ],
     ['Get a personal plan', 'Only the steps that apply to you, in the right order, with what each one unlocks.'],
     ['Ask Hej anything', 'Housing, CPR, MitID, work or tax. Answers point you to the official pages.'],
@@ -109,7 +129,7 @@ export function pageHome() {
   </div></section>
 
   <section class="section" aria-labelledby="features-title"><div class="container">
-    <div class="section-intro"><p class="eyebrow">What you get</p><h2 class="h2" id="features-title">Three things newcomers need, in one place</h2></div>
+    <div class="section-intro"><p class="eyebrow">What you get</p><h2 class="h2" id="features-title">What newcomers need, in one place</h2></div>
     <div class="features">${features.map(([ic, eb, t, d, to, l]) => `<article class="card feature"><span class="icon-circle">${icon(ic, 22, 'var(--green)')}</span><p class="eyebrow">${eb}</p><h3 class="h3">${t}</h3><p class="muted">${d}</p>${goLink(to, `<span>${l}</span>`)}</article>`).join('')}</div>
     <div class="card word-strip"><span class="flag" aria-hidden="true">🇩🇰</span><div class="col gap4 flex1" style="min-width:220px"><p class="eyebrow">Today’s Danish</p><p><span class="h4" lang="da">${esc(word.word)}</span> <span class="muted">· say it “${esc(word.pronunciation)}” · ${esc(word.meaning)}</span></p></div><p class="muted" lang="da">“${esc(word.example)}”</p></div>
   </div></section>
@@ -129,7 +149,7 @@ export function pageHome() {
   </div></section>
 
   <section class="cta-band"><div class="container cta-inner">
-    <div class="col gap12"><p class="eyebrow">Velkommen</p><h2 class="h2">${has ? 'Your plan is waiting for you.' : 'Your plan is four questions away.'}</h2><p class="muted">${has ? 'Pick up where you left off.' : 'No signup. Your plan stays on this device.'}</p></div>
+    <div class="col gap12"><p class="eyebrow">Velkommen</p><h2 class="h2">${has ? 'Your plan is waiting for you.' : 'Your plan is a minute away.'}</h2><p class="muted">${has ? 'Pick up where you left off.' : 'No signup. Your plan stays on this device.'}</p></div>
     ${has ? goLink('today', '<span>Continue my plan</span>', 'btn btn-light btn-lg') : goLink('start', '<span>Get my plan</span>', 'btn btn-light btn-lg')}
   </div></section>`;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { profile } from '../../tests/helpers.js';
+import { event, profile } from '../../tests/helpers.js';
 import type { AskMessage } from '../types.js';
 import { buildTurns, offlineAnswer, parseAnswer, stripSources } from './assistant.js';
 import { nextStep, planFor } from './plan.js';
@@ -100,10 +100,16 @@ describe('buildTurns', () => {
     expect(turns[0].role).toBe('user');
     expect(turns[0].content).toContain('You are Hej');
     expect(turns[0].content).toContain('reason for moving: Work');
-    expect(turns[0].content).toContain('- Register your EU residence: to do, Urgent');
+    expect(turns[0].content).toContain('- Get your EU registration certificate: to do, Urgent');
+    expect(turns[0].content).toContain('home: Looking for a home');
     expect(turns[0].content).toContain('locked until an earlier step is done');
     expect(turns[0].content).toContain('https://www.mitid.dk/en-gb/');
     expect(turns.at(-1)).toEqual({ role: 'user', content: 'Where do I register?' });
+  });
+
+  it('lists the events it is given, or says there are none', () => {
+    expect(buildTurns('q', [], me, plan, [event({ title: 'Harbour walk' })])[0].content).toContain('- Harbour walk (');
+    expect(buildTurns('q', [], me, plan)[0].content).toContain('- none listed');
   });
 
   it('includes only the last eight messages of history', () => {
