@@ -1,2 +1,97 @@
-# hej-denmark
-Hej Denmark is your go-to app for settling into life in Denmark, from day one to feeling at home.
+# Hej Denmark
+
+A calm, personal guide for settling into life in Denmark. Answer four questions and get a plan that fits you:
+the registrations and documents that apply to your situation, in the right order, with official links, plus
+a Danish word of the day, local events and an assistant that points you to official sources.
+
+Everything runs in the browser. There is no backend and no account: your plan is saved on your device.
+
+## What's in it
+
+| Screen  | What it does                                                                                  |
+| ------- | --------------------------------------------------------------------------------------------- |
+| Home    | Explains the problem and starts the plan builder.                                             |
+| Start   | Four questions: why you're moving, where from, which city, and whether you have a CPR number. |
+| Today   | Your next step, progress ring, reminders, events this week, the Danish word of the day.       |
+| Journey | Steps grouped into phases, filterable, with checklists, offices per city and prerequisites.   |
+| Ask Hej | Chat about settling in. Answers cite official pages only.                                     |
+| Events  | Filter by city, date and category. Save events, add them to a calendar, share them.           |
+| Profile | Edit your answers. Your plan updates and completed steps stay completed.                      |
+
+## Getting started
+
+You need Node.js 20.19 or newer (`.nvmrc` pins 22).
+
+```sh
+npm install
+npm run dev        # http://localhost:5173
+```
+
+| Script              | Purpose                                                          |
+| ------------------- | ---------------------------------------------------------------- |
+| `npm run dev`       | Start the dev server with hot reload.                            |
+| `npm run build`     | Type-check, then build to `dist/`.                               |
+| `npm run preview`   | Serve the production build locally.                              |
+| `npm test`          | Run the unit and DOM tests once (`npm run test:watch` to watch). |
+| `npm run typecheck` | Strict TypeScript check.                                         |
+| `npm run lint`      | ESLint (`lint:fix` to auto-fix).                                 |
+| `npm run format`    | Format with Prettier (`format:check` to verify).                 |
+| `npm run check`     | Everything CI runs, in one command.                              |
+
+## Project layout
+
+```
+index.html            Page shell and font links
+src/
+  main.ts             Entry point
+  app.ts              Start-up: restore guest, route, bind events, first render
+  router.ts           Hash routing and the "needs a plan" gate
+  render.ts           Picks the view for the current route and renders it
+  actions.ts          Click, input and submit handling (data-act attributes)
+  types.ts            Shared types
+  data/               Content: plan steps, phases, labels, events, links, icons, words
+  lib/                Pure logic: plan building, events, dates, markdown, assistant, storage
+  state/              The single state object and guest session persistence
+  services/ask.ts     Ask Hej: optional live model, otherwise built-in answers
+  views/              One module per screen, plus shared pieces and layout
+  styles/main.css     Styles and design tokens
+tests/                Test setup and helpers
+```
+
+## How it works
+
+- **State.** One mutable object (`src/state/state.ts`). Actions change it and call `render()`, which rebuilds
+  the page from it. There is no framework, so views are functions that return HTML strings.
+- **Events.** Elements carry `data-act` attributes. A single set of listeners on the root looks up the matching
+  handler in `actions.ts`, so views never attach handlers themselves.
+- **Routing.** Hash routes (`#today`, `#step-6`) work on any static host. Screens that need a plan send people
+  without one to the plan builder.
+- **Persistence.** Guest data lives in `localStorage`, with an in-memory fallback when storage is blocked.
+  Stored data is treated as untrusted and validated on load.
+- **Safety.** Everything interpolated into HTML goes through `esc()`. Assistant text is rendered by a small
+  Markdown subset that only links to official hosts (`src/data/links.ts`).
+
+## Content
+
+Plan steps, phases, offices and official links live in `src/data/`. Adding or changing a step is a data edit:
+`src/data/plan.ts` lists each step with the conditions it applies to (`applies_to`) and the steps it needs first
+(`requires`).
+
+Events are a snapshot of KultuNaut listings saved on 27 September 2026 (`src/data/events.ts`). Once every listing
+in a city has passed, the app shows recurring ideas instead. Refresh the snapshot to keep events current.
+
+## Ask Hej
+
+Out of the box, Ask Hej answers common questions from built-in guidance (`src/lib/assistant.ts`). When the page
+runs where Claude's runtime provides `window.claude`, it uses a live model instead, with the same profile and plan
+as context, and falls back to the built-in answers if that isn't available. There is no server component.
+
+## Deploying
+
+`npm run build` produces a static site in `dist/`. Asset paths are relative and routing uses the URL hash, so it
+works from any static host or sub-path (GitHub Pages, Netlify, S3, and so on).
+
+## Disclaimer
+
+Hej Denmark is an independent guide, not a government service. Rules change, so always check the official pages
+linked in each step.
