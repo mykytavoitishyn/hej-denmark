@@ -8,6 +8,7 @@ export const profile = (over: Partial<Profile> = {}): Profile => ({
   residency_group: 'eu-eea',
   city: 'copenhagen',
   has_cpr: false,
+  cpr_stage: over.has_cpr ? 'have' : 'none',
   arrival_date: null,
   stage: 'arrived',
   housing: 'searching',

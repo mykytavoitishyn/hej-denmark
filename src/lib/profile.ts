@@ -3,6 +3,7 @@ import { QUESTIONS } from '../data/questions.js';
 import type {
   Avatar,
   CityId,
+  CprStage,
   Household,
   HousingStatus,
   JobStatus,
@@ -24,6 +25,7 @@ const HOUSING: readonly HousingStatus[] = ['searching', 'temporary', 'settled'];
 const HOUSEHOLDS: readonly Household[] = ['solo', 'partner', 'kids', 'partner-kids'];
 const STUDIES: readonly StudyType[] = ['exchange', 'degree'];
 const JOBS: readonly JobStatus[] = ['offer', 'looking'];
+const CPR_STAGES: readonly CprStage[] = ['none', 'booked', 'waiting', 'have'];
 
 const oneOf = <T extends string>(v: unknown, allowed: readonly T[]): T | undefined =>
   typeof v === 'string' && (allowed as readonly string[]).includes(v) ? (v as T) : undefined;
@@ -35,6 +37,9 @@ const CONTROL_CHARS = /[\u0000-\u001f\u007f]/g;
 /** Trims a display name, drops control characters and caps its length. */
 export const cleanName = (v: unknown): string =>
   typeof v === 'string' ? v.replace(CONTROL_CHARS, '').replace(/\s+/g, ' ').trim().slice(0, MAX_NAME) : '';
+
+/** Reads a CPR stage from a button's value. Anything unexpected counts as not started. */
+export const cprStageOf = (v: unknown): CprStage => oneOf(v, CPR_STAGES) ?? 'none';
 
 /** A calendar date written as YYYY-MM-DD. */
 export const isDateString = (v: unknown): v is string =>
@@ -50,7 +55,6 @@ export function questionsFor(d: ProfileDraft, mode: 'onboarding' | 'edit'): Ques
 
 /** A draft answer as the string its question's choices use. */
 export function draftValue(d: ProfileDraft, key: QuestionKey): string | undefined {
-  if (key === 'hasCpr') return d.hasCpr === undefined ? undefined : d.hasCpr ? 'yes' : 'no';
   return d[key];
 }
 
@@ -58,7 +62,7 @@ export function draftValue(d: ProfileDraft, key: QuestionKey): string | undefine
 export function withAnswer(d: ProfileDraft, key: QuestionKey, value: string): ProfileDraft {
   const q = QUESTIONS.find(x => x.key === key);
   if (!q || !q.choices.some(c => c.value === value)) return d;
-  return { ...d, [key]: key === 'hasCpr' ? value === 'yes' : value };
+  return { ...d, [key]: value };
 }
 
 /** Turns finished answers into a profile, or null while an answer that applies is still missing. */
@@ -74,7 +78,8 @@ export function profileFromDraft(
     move_reason: moveReason,
     residency_group: residencyGroup,
     city,
-    has_cpr: d.hasCpr === true,
+    has_cpr: d.cprStage === 'have',
+    cpr_stage: d.cprStage ?? 'none',
     arrival_date: isDateString(extra.arrivalDate) ? extra.arrivalDate : null,
     stage,
     housing,
@@ -97,7 +102,7 @@ export function draftFromProfile(p: Profile): ProfileDraft {
     stage: p.stage,
     housing: p.housing,
     household: p.household,
-    hasCpr: p.has_cpr,
+    cprStage: p.cpr_stage,
   };
 }
 
@@ -118,13 +123,16 @@ export function normalizeProfile(raw: unknown, now = new Date()): Profile | null
     group = oneOf(p.residency_group, GROUPS),
     city = oneOf(p.city, CITIES);
   if (!move || !group || !city) return null;
-  const hasCpr = p.has_cpr === true;
+  // Profiles from before CPR stages only said whether someone had a CPR number.
+  const cprStage = oneOf(p.cpr_stage, CPR_STAGES) ?? (p.has_cpr === true ? 'have' : 'none');
+  const hasCpr = cprStage === 'have';
   const arrival = isDateString(p.arrival_date) ? p.arrival_date : null;
   return {
     move_reason: move,
     residency_group: group,
     city,
     has_cpr: hasCpr,
+    cpr_stage: cprStage,
     arrival_date: arrival,
     stage: oneOf(p.stage, STAGES) ?? inferStage(hasCpr, arrival, now),
     housing: oneOf(p.housing, HOUSING) ?? 'searching',

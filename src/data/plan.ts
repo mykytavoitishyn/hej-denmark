@@ -140,11 +140,12 @@ export const STEPS: Step[] = [
     description:
       'Register your Danish address with the municipality to get a CPR number, Denmark’s personal ID number.',
     why_matters: 'Your CPR number unlocks your health card, MitID, a bank account, Digital Post and your tax card.',
-    tip: 'Bring originals, not copies, and book your appointment as soon as you have an address.',
+    tip: 'Bring originals, not copies. Already been to your appointment? Mark this step done when your CPR number arrives.',
     timing: 'As soon as you have an address',
     applies_to: { has_cpr: [false] },
     requires: [1, 2, 5],
     checklist: [
+      { id: 'book', label: 'Book an appointment with International Citizen Service or Borgerservice' },
       { id: 'passport', label: 'Passport or national ID card' },
       { id: 'residence-proof', label: 'Your residence document: permit or EU registration certificate' },
       { id: 'housing-proof', label: 'Your lease or other proof of your address' },
@@ -453,18 +454,31 @@ export const STEPS: Step[] = [
   {
     id: 21,
     slug: 'student-work',
-    title: 'Know your work rights as a student',
+    title: 'Know what your student permit allows',
     description:
-      'A student residence permit usually lets you work part-time during the semester and more in the summer. Your permit sets the exact rules.',
-    why_matters: 'Working more than your permit allows can put your residence permit at risk.',
-    tip: 'Keep track of your hours, especially if you have more than one job.',
+      'A student residence permit usually lets you work up to 90 hours a month, and full time in June, July and August. It also rules out public benefits such as housing benefit (boligstøtte) and SU.',
+    why_matters: 'Working more than your permit allows, or receiving benefits it rules out, can cost you your permit.',
+    tip: 'Friends with an EU passport may get housing benefit for the same kind of room. On a student permit you can’t, so don’t apply.',
     timing: 'Before you take a job',
     applies_to: { move_reason: ['student'], residency_group: ['non-eu'] },
     requires: [],
-    checklist: [{ id: 'permit', label: 'Read the work conditions in your residence permit' }],
+    checklist: [
+      { id: 'permit', label: 'Read the work conditions in your residence permit' },
+      { id: 'hours', label: 'Keep track of your hours, especially with more than one job' },
+      { id: 'benefits', label: 'Don’t apply for housing benefit, SU or cash benefits' },
+    ],
     office_by_city: {},
     time_needed: '15 minutes.',
-    official_links: [{ url: 'https://www.nyidanmark.dk/en-GB', label: 'New to Denmark: studying' }],
+    official_links: [
+      {
+        url: 'https://www.nyidanmark.dk/en-GB/Words-and-concepts/SIRI/Work-permits-for-students-in-higher-educational-programmes',
+        label: 'New to Denmark: working while you study',
+      },
+      {
+        url: 'https://www.nyidanmark.dk/en-GB/Words-and-concepts/SIRI/Public-benefits-when-you-have-a-residence-permit-or-an-EU-residence-document-from-SIRI/Public-benefits-when-you-have-been-granted-a-permit-by-SIRI',
+        label: 'New to Denmark: benefits you can’t receive',
+      },
+    ],
   },
   {
     id: 22,
@@ -504,6 +518,68 @@ export const STEPS: Step[] = [
     time_needed: 'An evening a week.',
     official_links: [{ url: 'https://lifeindenmark.borger.dk/', label: 'Life in Denmark' }],
   },
+  {
+    id: 24,
+    slug: 'housing-benefit',
+    title: 'Check if you can get housing benefit',
+    description:
+      'Housing benefit (boligstøtte) is a tax-free monthly payment towards your rent. You can get it if you rent a home with your own kitchen or kitchenette and live there, even for a short stay.',
+    why_matters: 'For students on a small budget it can cover a real part of the rent. Nobody applies for you.',
+    tip: 'Many dorm rooms with shared kitchens don’t qualify, and neither does a room in someone else’s home. Check your home before you count on it.',
+    timing: 'After you’ve moved in',
+    applies_to: { move_reason: ['student'], residency_group: ['nordic', 'eu-eea'] },
+    requires: [5, 6, 8],
+    checklist: [
+      { id: 'kitchen', label: 'Your home has its own kitchen or kitchenette' },
+      { id: 'registered', label: 'You’re registered at the address with your CPR number' },
+      { id: 'lease', label: 'Your lease, with the rent and the size of the home' },
+      { id: 'apply', label: 'Apply online with MitID. It’s paid to your NemKonto' },
+      { id: 'changes', label: 'Tell Udbetaling Danmark if your rent, income or household changes' },
+    ],
+    office_by_city: {},
+    time_needed: 'About 20 minutes online.',
+    official_links: [
+      {
+        url: 'https://lifeindenmark.borger.dk/housing-and-moving/housing-benefits',
+        label: 'Life in Denmark: housing benefit',
+      },
+      {
+        url: 'https://www.borger.dk/bolig-og-flytning/boligstoette-oversigt/boligstoette-i-saerlige-situationer/boligstoette-saerligt-for-dig-der-er-studerende',
+        label: 'borger.dk: housing benefit for students (in Danish)',
+      },
+    ],
+  },
+  {
+    id: 25,
+    slug: 'deposit',
+    title: 'Know the rules for deposit and prepaid rent',
+    description:
+      'A landlord can ask for at most 3 months’ rent as a deposit and 3 months’ rent in advance. For a room it’s usually 1 month’s deposit, for a flat 3.',
+    why_matters: 'It’s often the biggest sum you pay when you move, and how you move in decides how much you get back.',
+    tip: 'Never pay a deposit before you’ve seen the home and signed a lease.',
+    timing: 'Before you sign a lease',
+    applies_to: { housing: ['searching', 'temporary'] },
+    requires: [],
+    checklist: [
+      { id: 'limits', label: 'Deposit and prepaid rent are at most 3 months’ rent each' },
+      { id: 'lease', label: 'A signed lease that states the deposit, before you pay anything' },
+      { id: 'defects', label: 'Report defects in writing within 14 days of moving in, with photos' },
+      { id: 'moveout', label: 'When you move out, be at the inspection and get the report in writing' },
+      { id: 'dispute', label: 'Deposit not returned? You can complain to the rent tribunal (huslejenævnet)' },
+    ],
+    office_by_city: {},
+    time_needed: '10 minutes to read, then keep your photos safe.',
+    official_links: [
+      {
+        url: 'https://lifeindenmark.borger.dk/housing-and-moving/rental-property/renting-a-home',
+        label: 'Life in Denmark: renting a home',
+      },
+      {
+        url: 'https://international.kk.dk/live/housing/finding-a-place-to-live/average-renting-costs',
+        label: 'City of Copenhagen: rents, deposit and prepaid rent',
+      },
+    ],
+  },
 ];
 
 export const PHASES: PhaseDef[] = [
@@ -521,6 +597,7 @@ export const PHASES: PhaseDef[] = [
       'work-documents',
       'job-search',
       'housing',
+      'deposit',
     ],
   },
   {
@@ -535,7 +612,7 @@ export const PHASES: PhaseDef[] = [
     title: 'Unlock daily life',
     intro: 'MitID, Digital Post, banking and tax',
     icon: 'KeyRound',
-    slugs: ['mitid', 'digital-post', 'banking', 'tax', 'student-work'],
+    slugs: ['mitid', 'digital-post', 'banking', 'tax', 'housing-benefit', 'student-work'],
   },
   {
     id: 'settle',
@@ -566,4 +643,6 @@ export const SOON = new Set<string>([
   'tax',
   'school-childcare',
   'student-work',
+  'housing-benefit',
+  'deposit',
 ]);

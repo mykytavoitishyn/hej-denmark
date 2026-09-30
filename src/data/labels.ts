@@ -1,5 +1,6 @@
 import type {
   CityId,
+  CprStage,
   Household,
   HousingStatus,
   JobStatus,
@@ -38,6 +39,12 @@ export const HOUSEHOLD_LABELS: Record<Household, string> = {
   partner: 'With a partner',
   kids: 'With children',
   'partner-kids': 'Partner and children',
+};
+export const CPR_LABELS: Record<CprStage, string> = {
+  none: 'Not started',
+  booked: 'Appointment booked',
+  waiting: 'Registered, waiting',
+  have: 'Ready',
 };
 export const STUDY_LABELS: Record<StudyType, string> = { exchange: 'Exchange', degree: 'Full degree' };
 export const JOB_LABELS: Record<JobStatus, string> = { offer: 'Job offer', looking: 'Looking for work' };

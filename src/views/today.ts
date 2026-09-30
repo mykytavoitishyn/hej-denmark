@@ -55,7 +55,7 @@ function arrivalCard(p: Profile): string {
     return card(
       'Do you have a CPR number yet?',
       'If you do, your plan moves on to MitID, a bank account and your health card.',
-      `<button class="btn btn-primary" data-act="arrive-cpr" data-value="yes">Yes, I have one</button><button class="btn btn-secondary" data-act="arrive-cpr" data-value="no">Not yet</button>`,
+      `<button class="btn btn-primary" data-act="arrive-cpr" data-value="have">Yes, I have one</button><button class="btn btn-secondary" data-act="arrive-cpr" data-value="booked">Appointment booked</button><button class="btn btn-secondary" data-act="arrive-cpr" data-value="none">Not yet</button>`,
       true,
     );
   if (!p.arrival_date || !arrivalCheckDue(p)) return '';

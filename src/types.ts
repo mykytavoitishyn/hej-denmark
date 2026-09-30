@@ -7,6 +7,8 @@ export type CityId = 'copenhagen' | 'aarhus' | 'odense' | 'aalborg' | 'other';
 /** How far along the move is: still planning, arriving within about a month, or already in Denmark. */
 export type Stage = 'planning' | 'soon' | 'arrived';
 export type HousingStatus = 'searching' | 'temporary' | 'settled';
+/** Where someone is with their CPR number: not started, appointment booked, registered and waiting, or have it. */
+export type CprStage = 'none' | 'booked' | 'waiting' | 'have';
 export type Household = 'solo' | 'partner' | 'kids' | 'partner-kids';
 export type StudyType = 'exchange' | 'degree';
 export type JobStatus = 'offer' | 'looking';
@@ -20,6 +22,8 @@ export interface Profile {
   residency_group: ResidencyGroup;
   city: CityId;
   has_cpr: boolean;
+  /** The steps before `has_cpr`. Kept in step with it: `has_cpr` is true only at 'have'. */
+  cpr_stage: CprStage;
   arrival_date: string | null;
   stage: Stage;
   housing: HousingStatus;
@@ -239,7 +243,7 @@ export interface Choice {
 }
 
 export type QuestionKey =
-  'moveReason' | 'studyType' | 'jobStatus' | 'residencyGroup' | 'city' | 'stage' | 'housing' | 'household' | 'hasCpr';
+  'moveReason' | 'studyType' | 'jobStatus' | 'residencyGroup' | 'city' | 'stage' | 'housing' | 'household' | 'cprStage';
 
 export interface Question {
   key: QuestionKey;
@@ -265,7 +269,7 @@ export interface ProfileDraft {
   stage?: Stage;
   housing?: HousingStatus;
   household?: Household;
-  hasCpr?: boolean;
+  cprStage?: CprStage;
 }
 
 export interface ProfileEdit extends ProfileDraft {

@@ -1,6 +1,7 @@
 import { AVATAR_COLORS, AVATAR_EMOJI } from '../data/avatars.js';
 import {
   CITY_LABELS,
+  CPR_LABELS,
   HOUSEHOLD_LABELS,
   HOUSING_LABELS,
   JOB_LABELS,
@@ -102,7 +103,7 @@ export function pageProfile() {
           <div class="col gap4 min0 flex1"><h2 class="h3">${p.name ? esc(p.name) : 'Your Denmark profile'}</h2><p class="row gap6 muted">${icon('MapPin', 15, 'var(--muted)')}${esc(p.city === 'other' ? 'Denmark' : CITY_LABELS[p.city])} · ${esc(STAGE_LABELS[p.stage])}</p></div>
         </div>
         ${S.avatarOpen ? avatarPicker() : ''}
-        <div class="tiles">${tile('Moving for', MOVE_LABELS[p.move_reason] + studies + job)}${tile('Citizenship', RES_LABELS[p.residency_group])}${tile('City', CITY_LABELS[p.city])}${tile('CPR number', p.has_cpr ? 'Ready' : 'Not yet')}${tile('Home', HOUSING_LABELS[p.housing])}${tile('Moving with', HOUSEHOLD_LABELS[p.household])}${tile('Arrival', arrival, true)}</div>
+        <div class="tiles">${tile('Moving for', MOVE_LABELS[p.move_reason] + studies + job)}${tile('Citizenship', RES_LABELS[p.residency_group])}${tile('City', CITY_LABELS[p.city])}${tile('CPR number', CPR_LABELS[p.cpr_stage])}${tile('Home', HOUSING_LABELS[p.housing])}${tile('Moving with', HOUSEHOLD_LABELS[p.household])}${tile('Arrival', arrival, true)}</div>
       </section>
       ${badgesHTML()}
     </div>

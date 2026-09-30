@@ -8,16 +8,16 @@ Everything runs in the browser. There is no backend and no account: your plan is
 
 ## What's in it
 
-| Screen  | What it does                                                                                  |
-| ------- | --------------------------------------------------------------------------------------------- |
-| Home    | Explains the problem and starts the plan builder.                                             |
-| Start   | Four questions: why you're moving, where from, which city, and whether you have a CPR number. |
-| Today   | Your next step, progress ring, reminders, events this week, the Danish word of the day.       |
-| Journey | Steps grouped into phases, filterable, with checklists, offices per city and prerequisites.   |
-| Ask Hej | Chat about settling in. Answers cite official pages only.                                     |
-| Events  | Filter by city, date and category. Save events, add them to a calendar, share them.           |
-| Budget  | Monthly costs in Copenhagen, take-home pay after tax, and the money to have ready to move in. |
-| Profile | Edit your answers. Your plan updates and completed steps stay completed.                      |
+| Screen  | What it does                                                                                                                                       |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home    | Explains the problem and starts the plan builder.                                                                                                  |
+| Start   | A few questions: why you're moving, from where, your city, your move, your home and where you are with your CPR number (booked, waiting or ready). |
+| Today   | Your next step, progress ring, reminders, events this week, the Danish word of the day.                                                            |
+| Journey | Steps grouped into phases, filterable, with checklists, offices per city and prerequisites.                                                        |
+| Ask Hej | Chat about settling in. Answers cite official pages only.                                                                                          |
+| Events  | Filter by city, date and category. Save events, add them to a calendar, share them.                                                                |
+| Budget  | Monthly costs in Copenhagen, take-home pay after tax, and the money to have ready to move in.                                                      |
+| Profile | Edit your answers. Your plan updates and completed steps stay completed.                                                                           |
 
 ## Getting started
 

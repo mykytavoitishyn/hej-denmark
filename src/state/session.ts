@@ -1,5 +1,6 @@
 import { normalizeBudget } from '../lib/budget.js';
 import { normalizeEvent } from '../lib/event-feed.js';
+import { STEPS } from '../data/plan.js';
 import { planFor } from '../lib/plan.js';
 import { withLiveStage } from '../lib/stage.js';
 import { normalizeAvatar, normalizeProfile } from '../lib/profile.js';
@@ -121,7 +122,24 @@ export function toggleSkip(id: number): boolean {
   return true;
 }
 
+/**
+ * Ticks the CPR step's checklist to match what the person told us: the booking once an appointment is booked, and
+ * everything once they've been to it. The step itself stays open until the number arrives, since MitID needs it.
+ */
+function syncCprChecklist(): void {
+  const stage = S.profile?.cpr_stage;
+  const step = STEPS.find(s => s.slug === 'cpr');
+  if (!step || (stage !== 'booked' && stage !== 'waiting')) return;
+  const want = stage === 'waiting' ? step.checklist.map(c => c.id) : ['book'];
+  const key = String(step.id);
+  const ticked = new Set(S.checklist[key] ?? []);
+  if (want.every(id => ticked.has(id))) return;
+  S.checklist = { ...S.checklist, [key]: [...new Set([...ticked, ...want])] };
+  saveGuestData('checklist', S.checklist);
+}
+
 export function afterProfileChange(): void {
+  syncCprChecklist();
   buildPlan();
   S.openPhases = null;
   S.phaseKey = null;

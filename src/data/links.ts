@@ -18,6 +18,22 @@ export const OFFICIAL: [url: string, title: string][] = [
     'Life in Denmark: International Citizen Service',
   ],
   ['https://lifeindenmark.borger.dk/housing-and-moving', 'Life in Denmark: housing and moving'],
+  [
+    'https://lifeindenmark.borger.dk/housing-and-moving/rental-property/renting-a-home',
+    'Life in Denmark: renting a home',
+  ],
+  [
+    'https://lifeindenmark.borger.dk/housing-and-moving/housing-benefits',
+    'Life in Denmark: housing benefit (boligstøtte)',
+  ],
+  [
+    'https://www.borger.dk/bolig-og-flytning/boligstoette-oversigt/boligstoette-i-saerlige-situationer/boligstoette-saerligt-for-dig-der-er-studerende',
+    'borger.dk: housing benefit for students (in Danish)',
+  ],
+  [
+    'https://international.kk.dk/live/housing/finding-a-place-to-live/average-renting-costs',
+    'City of Copenhagen: rents, deposit and prepaid rent',
+  ],
   ['https://lifeindenmark.borger.dk/healthcare', 'Life in Denmark: healthcare'],
   ['https://lifeindenmark.borger.dk/money-and-tax', 'Life in Denmark: money and tax'],
   ['https://lifeindenmark.borger.dk/apps-and-digital-services/mitid', 'Life in Denmark: MitID'],
@@ -30,6 +46,10 @@ export const OFFICIAL: [url: string, title: string][] = [
   [
     'https://www.nyidanmark.dk/en-GB/Words-and-concepts/SIRI/Work-permits-for-students-in-higher-educational-programmes',
     'New to Denmark: working while you study',
+  ],
+  [
+    'https://www.nyidanmark.dk/en-GB/Words-and-concepts/SIRI/Public-benefits-when-you-have-a-residence-permit-or-an-EU-residence-document-from-SIRI/Public-benefits-when-you-have-been-granted-a-permit-by-SIRI',
+    'New to Denmark: public benefits you can’t receive on a permit, including as a student',
   ],
   ['https://www.mitid.dk/en-gb/', 'MitID'],
   ['https://skat.dk/en-us/individuals', 'Danish Tax Agency'],

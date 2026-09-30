@@ -24,6 +24,7 @@ function previewCard() {
       residency_group: 'eu-eea',
       city: 'copenhagen',
       has_cpr: false,
+      cpr_stage: 'none',
       arrival_date: null,
       stage: 'arrived',
       housing: 'searching',

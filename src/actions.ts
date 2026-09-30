@@ -3,7 +3,14 @@ import { AMOUNT_FIELDS, budgetDefaults, withAmount, withChoice, withToggle } fro
 import { icon } from './lib/dom.js';
 import { dateLabel, eventsIn, timeLabel } from './lib/event-feed.js';
 import { activeSteps, currentPhase, journeyPhases } from './lib/plan.js';
-import { draftFromProfile, MAX_PHOTO_CHARS, profileFromDraft, questionsFor, withAnswer } from './lib/profile.js';
+import {
+  cprStageOf,
+  draftFromProfile,
+  MAX_PHOTO_CHARS,
+  profileFromDraft,
+  questionsFor,
+  withAnswer,
+} from './lib/profile.js';
 import { render } from './render.js';
 import { go } from './router.js';
 import { sendQuestion } from './services/ask.js';
@@ -197,7 +204,7 @@ const actions: Record<string, Action> = {
       // Skip ahead past questions that are already answered, which brings people back to the review after a change.
       const qs = questionsFor(draft, 'onboarding');
       const at = qs.findIndex(x => x.key === q.key);
-      const next = qs.findIndex((x, k) => k > at && (x.key === 'hasCpr' ? draft.hasCpr : draft[x.key]) === undefined);
+      const next = qs.findIndex((x, k) => k > at && draft[x.key] === undefined);
       S.onb = { ...S.onb, draft, i: next === -1 ? qs.length : next, dir: 'fwd' };
       render();
       focusQuestion();
@@ -438,7 +445,8 @@ const actions: Record<string, Action> = {
   'arrive-cpr': el => {
     const p = requireProfile();
     withRewards(() => {
-      S.profile = { ...p, has_cpr: data(el, 'value') === 'yes' };
+      const stage = cprStageOf(data(el, 'value'));
+      S.profile = { ...p, cpr_stage: stage, has_cpr: stage === 'have' };
       saveGuestData('profile', S.profile);
       afterProfileChange();
     });

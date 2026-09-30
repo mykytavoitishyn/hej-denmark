@@ -87,4 +87,9 @@ export const HOUSING_GLOSSARY: [term: string, meaning: string][] = [
   ['Depositum', 'The deposit, paid back when you move out minus the cost of any damage.'],
   ['Forudbetalt leje', 'Prepaid rent, used for your last months before you move out.'],
   ['A conto', 'Monthly advance payments for heating or water, settled once a year.'],
+  [
+    'Boligstøtte',
+    'Housing benefit: tax-free monthly help with rent, if your home has its own kitchen. Not allowed on a student residence permit.',
+  ],
+  ['Huslejenævn', 'The rent tribunal in your municipality. It settles disputes, for example over a deposit.'],
 ];

@@ -102,14 +102,21 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
-    key: 'hasCpr',
+    key: 'cprStage',
     label: 'CPR number',
-    prompt: 'Do you already have a CPR number?',
-    hint: 'The CPR number is Denmark’s personal ID number. Most other steps need it.',
-    askIf: d => d.stage === 'arrived',
+    prompt: 'Where are you with your CPR number?',
+    hint: 'The CPR number is Denmark’s personal ID number. Most other steps need it, so your plan works around it.',
+    askIf: d => d.stage !== 'planning',
     choices: [
-      { value: 'yes', label: 'Yes, I have one', icon: 'CircleCheck' },
-      { value: 'no', label: 'Not yet', icon: 'Clock3' },
+      { value: 'none', label: 'Not started', desc: 'No appointment yet', icon: 'Circle' },
+      {
+        value: 'booked',
+        label: 'Appointment booked',
+        desc: 'With International Citizen Service or Borgerservice',
+        icon: 'CalendarDays',
+      },
+      { value: 'waiting', label: 'Registered, waiting for it', desc: 'I’ve been to my appointment', icon: 'Clock3' },
+      { value: 'have', label: 'I have my CPR number', icon: 'CircleCheck' },
     ],
   },
 ];

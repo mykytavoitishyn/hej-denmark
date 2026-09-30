@@ -62,7 +62,7 @@ describe('plan builder', () => {
   it('turns the answers into a saved profile and opens the Journey', () => {
     vi.useFakeTimers();
     go('start');
-    for (const value of ['work', 'offer', 'eu-eea', 'aarhus', 'soon', 'searching', 'solo']) answer(value);
+    for (const value of ['work', 'offer', 'eu-eea', 'aarhus', 'soon', 'searching', 'solo', 'booked']) answer(value);
     expect(root.textContent).toContain('Your plan is ready to build');
     const name = root.querySelector<HTMLInputElement>('#onb-name');
     if (!name) throw new Error('No name field');
@@ -74,6 +74,7 @@ describe('plan builder', () => {
       residency_group: 'eu-eea',
       city: 'aarhus',
       has_cpr: false,
+      cpr_stage: 'booked',
       arrival_date: null,
       stage: 'soon',
       housing: 'searching',
@@ -89,6 +90,8 @@ describe('plan builder', () => {
     expect(location.hash).toBe('#journey');
     expect(root.textContent).toContain('Velkommen, Sofia!');
     expect(localStorage.getItem(KEY.profile(S.guestId ?? ''))).toContain('aarhus');
+    // Booking the CPR appointment is already done, so the CPR step's checklist starts with it ticked.
+    expect(S.checklist[String(S.plan.find(s => s.slug === 'cpr')?.id)]).toEqual(['book']);
   });
 
   it('asks follow-up questions only when they apply, and returns to the review after a change', () => {
@@ -98,8 +101,8 @@ describe('plan builder', () => {
     answer('degree');
     for (const value of ['non-eu', 'odense', 'arrived', 'settled', 'partner']) answer(value);
     // Only people who have arrived are asked about a CPR number.
-    expect(root.textContent).toContain('Do you already have a CPR number?');
-    answer('yes');
+    expect(root.textContent).toContain('Where are you with your CPR number?');
+    answer('have');
     expect(root.textContent).toContain('Your plan is ready to build');
     click('[data-act="onb-jump"][data-i="0"]');
     answer('family');
@@ -236,7 +239,7 @@ describe('arriving in Denmark', () => {
     click('[data-act="arrive-yes"]');
     expect(S.profile?.stage).toBe('arrived');
     expect(root.textContent).toContain('Do you have a CPR number yet?');
-    click('[data-act="arrive-cpr"][data-value="no"]');
+    click('[data-act="arrive-cpr"][data-value="none"]');
     expect(S.profile?.has_cpr).toBe(false);
     expect(root.querySelector('.checkin')).toBeNull();
     expect(S.plan.some(s => s.slug === 'cpr')).toBe(true);

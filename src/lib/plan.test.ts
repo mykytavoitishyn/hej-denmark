@@ -33,6 +33,7 @@ describe('planFor', () => {
       'danish-classes',
       'student-work',
       'community',
+      'deposit',
     ]);
   });
 
@@ -51,6 +52,7 @@ describe('planFor', () => {
       'danish-classes',
       'a-kasse',
       'community',
+      'deposit',
     ]);
     expect(plan.filter(s => s.locked).map(s => s.slug)).toEqual(['digital-post']);
   });
@@ -145,7 +147,7 @@ describe('journeyPhases', () => {
   it('groups steps into phases in journey order and drops empty phases', () => {
     const phases = journeyPhases(planFor(profile(), new Set()));
     expect(phases.map(p => p.id)).toEqual(['prepare', 'first-weeks', 'digital-life', 'settle']);
-    expect(phases[0].steps.map(s => s.slug)).toEqual(['work-documents', 'housing']);
+    expect(phases[0].steps.map(s => s.slug)).toEqual(['work-documents', 'housing', 'deposit']);
     expect(journeyPhases(planFor(profile(), new Set()).filter(s => s.slug === 'city-services')).map(p => p.id)).toEqual(
       ['first-weeks'],
     );
@@ -162,7 +164,10 @@ describe('journeyPhases', () => {
 
 describe('currentPhase and planSummary', () => {
   it('finds the first phase with work left', () => {
-    const plan = planFor(profile(), new Set([idOf('eu-residence'), idOf('work-documents'), idOf('housing')]));
+    const plan = planFor(
+      profile(),
+      new Set([idOf('eu-residence'), idOf('work-documents'), idOf('housing'), idOf('deposit')]),
+    );
     expect(currentPhase(plan)?.id).toBe('first-weeks');
   });
 
@@ -175,7 +180,7 @@ describe('currentPhase and planSummary', () => {
 
   it('summarises progress', () => {
     const summary = planSummary(planFor(profile(), new Set([idOf('eu-residence')])));
-    expect(summary).toMatchObject({ completed: 1, total: 13, percentage: 8 });
+    expect(summary).toMatchObject({ completed: 1, total: 14, percentage: 7 });
     expect(summary.nextStep?.slug).toBe('housing');
   });
 
