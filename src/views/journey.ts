@@ -1,6 +1,7 @@
 import { cityName } from '../data/labels.js';
 import { esc, ext, icon, isOfficial, isWide } from '../lib/dom.js';
 import { activeSteps, journeyPhases, nextStep, planSummary, prio, stepOffice, unlocksOf } from '../lib/plan.js';
+import { FEATURES } from '../data/features.js';
 import { STEP_XP, tickedItems } from '../lib/rewards.js';
 import { S, requireProfile } from '../state/state.js';
 import type { PlanStep } from '../types.js';
@@ -23,7 +24,7 @@ function stepRow(s: PlanStep, selectedId: number | undefined, nextId: number | u
   const sub = s.locked
     ? `<span class="tiny muted">Available after: ${esc(reqs)}</span>`
     : s.completed
-      ? `<span class="tiny muted">Done · +${STEP_XP[p]} XP</span>`
+      ? `<span class="tiny muted">Done${FEATURES.rewards ? ` · +${STEP_XP[p]} XP` : ''}</span>`
       : `<span class="row wrap gap8">${badge(p)}<span class="tiny muted">${esc(s.timing)}</span></span>`;
   const label = `${s.title}, ${s.locked ? `locked until ${reqs}` : s.completed ? 'done' : `${p}, ${s.timing}`}`;
   return `<a class="step-row" href="#step-${s.id}" data-act="step" data-id="${s.id}" style="--i:${i}"${selectedId === s.id ? ' aria-current="true"' : ''} aria-label="${esc(label)}"><span class="step-ico">${ic}</span><span class="col gap6 min0 flex1"><span class="step-title${s.completed ? ' done' : ''}">${esc(s.title)}${s.id === nextId ? '<span class="tag">Up next</span>' : ''}</span>${sub}</span>${icon('ChevronRight', 18, 'var(--muted)')}</a>`;
@@ -60,7 +61,7 @@ function stepDetail(st: PlanStep): string {
   const primary =
     st.locked && !st.completed
       ? `<button class="btn btn-primary" disabled>${icon('LockKeyhole', 18)}<span>Complete prerequisite first</span></button>`
-      : `<button class="btn ${st.completed ? 'btn-secondary' : 'btn-primary'}" data-act="step-toggle" data-id="${st.id}">${st.completed ? icon('RotateCcw', 18) : icon('Check', 18, 'currentColor', { stroke: 2.5 })}<span>${st.completed ? 'Mark not done' : `Mark done · +${xp} XP`}</span></button>`;
+      : `<button class="btn ${st.completed ? 'btn-secondary' : 'btn-primary'}" data-act="step-toggle" data-id="${st.id}">${st.completed ? icon('RotateCcw', 18) : icon('Check', 18, 'currentColor', { stroke: 2.5 })}<span>${st.completed ? 'Mark not done' : `Mark done${FEATURES.rewards ? ` · +${xp} XP` : ''}`}</span></button>`;
   const skip = st.completed
     ? ''
     : `<button class="btn btn-ghost btn-sm" data-act="step-skip" data-id="${st.id}">${icon(st.skipped ? 'Undo2' : 'EyeOff', 16, 'var(--muted)')}<span>${st.skipped ? 'Add back to my plan' : 'Not relevant for me'}</span></button>`;
@@ -71,7 +72,7 @@ function stepDetail(st: PlanStep): string {
     <div class="meta-row">
       <span>${icon('CalendarDays', 16, 'var(--sage)')}${esc(st.timing)}</span>
       <span>${icon('Timer', 16, 'var(--sage)')}${esc(st.time_needed ?? 'Varies')}</span>
-      <span>${icon('Star', 16, 'var(--sage)')}${xp} XP</span>
+      ${FEATURES.rewards ? `<span>${icon('Star', 16, 'var(--sage)')}${xp} XP</span>` : ''}
     </div>
     ${st.locked ? `<div class="locked-box">${icon('LockKeyhole', 20, 'var(--muted)')}<p class="muted">Available after: ${esc(reqs)}</p></div>` : ''}
     ${toastHTML('step')}

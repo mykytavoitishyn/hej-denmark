@@ -1,4 +1,5 @@
 import { AVATAR_COLORS, AVATAR_EMOJI } from '../data/avatars.js';
+import { FEATURES } from '../data/features.js';
 import {
   CITY_LABELS,
   CPR_LABELS,
@@ -59,7 +60,7 @@ export function pageProfile() {
   const p = requireProfile(),
     edit = S.pe,
     sum = planSummary(S.plan),
-    lvl = currentLevel();
+    lvl = FEATURES.rewards ? currentLevel() : null;
   const head = `<div class="page-head"><div class="col gap10"><p class="eyebrow">Your Denmark setup</p><h1 class="h1">Profile</h1></div>${edit ? '' : `<button class="btn btn-outline" data-act="pe-start">${icon('Pencil', 16, 'var(--green)')}<span>Edit answers</span></button>`}</div>`;
   if (edit) {
     const qs = questionsFor(edit, 'edit');
@@ -105,7 +106,7 @@ export function pageProfile() {
         ${S.avatarOpen ? avatarPicker() : ''}
         <div class="tiles">${tile('Moving for', MOVE_LABELS[p.move_reason] + studies + job)}${tile('Citizenship', RES_LABELS[p.residency_group])}${tile('City', CITY_LABELS[p.city])}${tile('CPR number', CPR_LABELS[p.cpr_stage])}${tile('Home', HOUSING_LABELS[p.housing])}${tile('Moving with', HOUSEHOLD_LABELS[p.household])}${tile('Arrival', arrival, true)}</div>
       </section>
-      ${badgesHTML()}
+      ${FEATURES.rewards ? badgesHTML() : ''}
     </div>
     <aside class="col gap16">
       ${lvl ? `<div class="card card-sm col gap12 level-card"><p class="eyebrow">Your level</p>${xpBar(lvl.xp, lvl.lp)}</div>` : ''}

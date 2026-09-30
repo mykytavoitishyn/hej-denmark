@@ -1,3 +1,4 @@
+import { FEATURES } from '../data/features.js';
 import { APP_URL, HELP_LINKS } from '../data/links.js';
 import { esc, ext, icon } from '../lib/dom.js';
 import { currentLevel } from '../state/progress.js';
@@ -20,7 +21,7 @@ function navActive() {
 export function header() {
   const active = navActive();
   const cur = (id: string) => (active === id ? ' aria-current="page"' : '');
-  const lvl = currentLevel();
+  const lvl = FEATURES.rewards ? currentLevel() : null;
   const right = S.profile
     ? `<a class="profile-link" href="#profile" data-act="go" data-to="profile"${cur('profile')} aria-label="Profile${lvl ? `, level ${lvl.lp.level.n}` : ''}">${avatarHTML('sm')}<span class="hide-sm profile-name">${S.profile.name ? esc(S.profile.name) : 'Profile'}</span>${lvl ? `<span class="lvl-pill hide-sm" aria-hidden="true">Lv ${lvl.lp.level.n}</span>` : ''}</a>`
     : `<a class="btn btn-ghost btn-sm hide-sm" href="#login" data-act="go" data-to="login">Log in</a><a class="btn btn-primary btn-sm" href="#start" data-act="go" data-to="start">Get my plan</a>`;

@@ -1,4 +1,5 @@
 import { CAT_ICONS } from '../data/events.js';
+import { FEATURES } from '../data/features.js';
 import { cityName, MOVE_LABELS, RES_LABELS } from '../data/labels.js';
 import { promptsFor } from '../data/prompts.js';
 import { esc, icon } from '../lib/dom.js';
@@ -75,7 +76,7 @@ export function pageToday() {
   const cityLabel = cityName(p.city, 'Denmark');
   const reminders = S.reminders.filter(r => Date.parse(r.remindAt) >= Date.now());
   const [next, ...later] = actionableSteps(S.plan);
-  const lvl = currentLevel();
+  const lvl = FEATURES.rewards ? currentLevel() : null;
   const input = rewardInput();
   const earned = input ? new Set(earnedBadges(input).map(b => b.id)) : new Set<string>();
   const nextBadge = BADGES.find(b => !earned.has(b.id));
@@ -86,7 +87,7 @@ export function pageToday() {
       <h2 class="h3">${esc(next.title)}</h2>
       <p class="muted">${esc(next.description)}</p>
       <div class="row wrap gap10 mt-auto">
-        <button class="btn btn-primary" data-act="today-done" data-id="${next.id}">${icon('Check', 18, 'currentColor', { stroke: 2.5 })}<span>Mark done · +${STEP_XP[prio(next)]} XP</span></button>
+        <button class="btn btn-primary" data-act="today-done" data-id="${next.id}">${icon('Check', 18, 'currentColor', { stroke: 2.5 })}<span>Mark done${FEATURES.rewards ? ` · +${STEP_XP[prio(next)]} XP` : ''}</span></button>
         <a class="btn btn-secondary" href="#step-${next.id}" data-act="step" data-id="${next.id}">See details</a>
       </div>
       ${
@@ -158,7 +159,7 @@ export function pageToday() {
       </section>`
           : ''
       }
-      <section class="card span-7 col gap12" aria-labelledby="road-title">
+      <section class="card ${lvl ? 'span-7' : 'span-12'} col gap12" aria-labelledby="road-title">
         <div class="row between gap12"><h2 class="h4" id="road-title">Your roadmap</h2>${goLink('journey', '<span>Open</span>')}</div>
         ${roadmap(journeyPhases(activeSteps(S.plan)), { compact: true })}
       </section>

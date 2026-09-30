@@ -1,3 +1,4 @@
+import { FEATURES } from '../data/features.js';
 import { esc } from '../lib/dom.js';
 import { rewardChanges } from '../lib/rewards.js';
 import { rewardInput } from '../state/progress.js';
@@ -67,9 +68,10 @@ export function celebrate(title: string, detail: string, emoji: string, withConf
 
 /**
  * Runs a change and celebrates what it earned: new badges and a new level. Rewards are derived from the state,
- * so comparing a snapshot from before and after is all it takes.
+ * so comparing a snapshot from before and after is all it takes. While rewards are switched off, it just runs the change.
  */
 export function withRewards<T>(change: () => T): T {
+  if (!FEATURES.rewards) return change();
   const before = rewardInput();
   const result = change();
   const after = rewardInput();

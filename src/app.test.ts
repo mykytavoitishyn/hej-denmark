@@ -422,3 +422,18 @@ describe('every screen renders cleanly for every kind of newcomer', () => {
             }
           });
 });
+
+describe('badges and levels', () => {
+  it('stay out of sight while they’re switched off', () => {
+    signIn(profile({ name: 'Sofia' }));
+    for (const screen of ['today', 'journey', 'profile'] as const) {
+      go(screen);
+      expect(root.textContent, screen).not.toMatch(/\bXP\b|Level \d|Badges|Lv \d/);
+    }
+    go('journey');
+    click('.step-row');
+    click('[data-act="step-toggle"]');
+    expect(root.textContent).not.toMatch(/\bXP\b/);
+    expect(document.querySelector('.celebration')).toBeNull();
+  });
+});
