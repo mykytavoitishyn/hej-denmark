@@ -441,7 +441,7 @@ export const STEPS: Step[] = [
     description:
       'EU, EEA and Swiss students who work enough hours alongside a full degree may qualify for SU, the Danish state education support.',
     why_matters: 'SU can make a real difference to your budget while you study.',
-    tip: 'Read the rules on working hours carefully before you apply.',
+    tip: 'Read the rules on working hours carefully before you apply. From 1 October 2026, Udbetaling Danmark pays SU, SU loans and supplements.',
     timing: 'Your first months',
     applies_to: { move_reason: ['student'], study_type: ['degree'], residency_group: ['nordic', 'eu-eea'] },
     requires: [],

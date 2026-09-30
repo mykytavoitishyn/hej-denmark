@@ -150,8 +150,8 @@ export function pageHome() {
   <section class="section" aria-labelledby="why-title"><div class="container">
     <div class="section-intro"><p class="eyebrow">Why it matters</p><h2 class="h2" id="why-title">Tens of thousands start this every year</h2></div>
     <div class="stats">
-      <div class="card stat"><p class="stat-num">78,901</p><p class="stat-cap">people moved to Denmark in 2025, not counting Nordic citizens</p><p class="tiny muted">Statistics Denmark via The Local (Apr 2026)</p></div>
-      <div class="card stat"><p class="stat-num">40th</p><p class="stat-cap">of 46 countries for ease of settling in: feeling welcome and making friends</p><p class="tiny muted">InterNations Expat Insider 2025 · it was 51st of 53 in 2023</p></div>
+      <div class="card stat"><p class="stat-num">78,901</p><p class="stat-cap">people without Danish or Nordic citizenship moved to Denmark in 2025, three in five to work or study</p><p class="tiny muted">Statistics Denmark (Apr 2026)</p></div>
+      <div class="card stat"><p class="stat-num">25th</p><p class="stat-cap">of 31 countries for ease of settling in: feeling welcome and making friends</p><p class="tiny muted">InterNations Expat Insider 2026 · 19% of expats in Denmark find local friends easy, against 39% worldwide</p></div>
     </div>
     <p class="lead" style="margin-top:32px;color:var(--ink)">Paperwork is half of it. Feeling at home is the other half.</p>
   </div></section>
