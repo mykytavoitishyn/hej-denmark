@@ -98,6 +98,10 @@ svg.ic {
   white-space: nowrap;
   border: 0;
 }
+/* Closed sections stay closed even when their class sets a display, like .phase-body's flex. */
+[hidden] {
+  display: none !important;
+}
 .container {
   width: 100%;
   max-width: 1160px;
