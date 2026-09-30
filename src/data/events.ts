@@ -66,11 +66,26 @@ export const MEET_IDEAS: MeetIdea[] = [
     cities: ['copenhagen'],
   },
   {
-    title: 'Your local library',
-    text: 'Danish libraries host free talks, language cafés and workshops. Look for “arrangementer”.',
-    url: 'https://lifeindenmark.borger.dk/',
-    icon: 'Library',
+    title: 'Dear World',
+    text: 'Weekly bar, quiz and run club nights for internationals, mostly in their 20s.',
+    url: 'https://luma.com/user/dearworldcph',
+    icon: 'UsersRound',
+    cities: ['copenhagen'],
   },
+  ...(
+    [
+      ['copenhagen', 'Copenhagen Libraries', 'https://bibliotek.kk.dk/arrangementer'],
+      ['aarhus', 'Aarhus Libraries', 'https://www.aakb.dk/arrangementer'],
+      ['odense', 'Odense Libraries', 'https://www.odensebib.dk/arrangementer'],
+      ['aalborg', 'Aalborg Libraries', 'https://www.aalborgbibliotekerne.dk/arrangementer'],
+    ] as const
+  ).map(([city, title, url]) => ({
+    title,
+    text: 'Language cafés, talk clubs and meet-ups, most of them free. Look for “arrangementer”.',
+    url,
+    icon: 'Library' as const,
+    cities: [city],
+  })),
   {
     title: 'KultuNaut',
     text: 'Denmark’s big what’s-on guide, with listings for every town.',

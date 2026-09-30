@@ -1,0 +1,40 @@
+name: Events
+
+# Rebuilds public/data/events.json every morning from the sources in scripts/events/sources.ts and commits it when it
+# changed. GitHub only runs schedules on the default branch, may start them late, and pauses them in public
+# repositories after 60 days without activity.
+on:
+  schedule:
+    - cron: '15 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: events
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run events:fetch
+      - run: npm test
+      - name: Commit the new feed
+        run: |
+          if git diff --quiet -- public/data/events.json; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/data/events.json
+          git commit -m 'Refresh events'
+          git push

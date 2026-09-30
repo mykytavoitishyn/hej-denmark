@@ -47,6 +47,10 @@ export const OFFICIAL: [url: string, title: string][] = [
     'https://lifeindenmark.borger.dk/settle-in-denmark/ics-international-citizen-service/ics-north-in-aalborg',
     'International Citizen Service North, Aalborg',
   ],
+  ['https://bibliotek.kk.dk/arrangementer', 'Copenhagen Libraries: events'],
+  ['https://www.aakb.dk/arrangementer', 'Aarhus Libraries: events'],
+  ['https://www.odensebib.dk/arrangementer', 'Odense Libraries: events'],
+  ['https://www.aalborgbibliotekerne.dk/arrangementer', 'Aalborg Libraries: events'],
   ['https://www.kultunaut.dk/UK/', 'KultuNaut event guide'],
   ['https://www.visitdenmark.com/denmark/things-to-do/events/event-calendar', 'VisitDenmark event calendar'],
 ];

@@ -41,6 +41,7 @@ function eventCard(e: EventItem, saved: boolean, i: number): string {
       <h2 class="h4 clamp2">${esc(e.title)}</h2>
       <p class="ev-loc">${icon('Clock3', 16, 'var(--muted)')}<span class="clamp1">${esc(timeLabel(e))}</span></p>
       <p class="ev-loc">${icon('MapPin', 16, 'var(--muted)')}<span class="clamp1">${esc(e.venue || 'Location on the event page')}</span></p>
+      <p class="tiny muted ev-via">via ${esc(e.sourceName)}</p>
     </div>
     <div class="ev-actions">
       <a href="${esc(e.url)}" ${ext} aria-label="${esc(`Details for ${e.title} on ${e.sourceName}`)}">${icon('ExternalLink', 16, 'var(--muted)')}<span>Details</span></a>
@@ -102,9 +103,15 @@ export function pageEvents() {
     body = `${dated.length ? `<div class="ev-grid">${dated.map(e => eventCard(e, savedIds.has(e.id), n++)).join('')}</div>` : ''}
       ${ongoing.length ? `<div class="col gap16"><h2 class="h3">Exhibitions and ongoing</h2><div class="ev-grid">${ongoing.map(e => eventCard(e, savedIds.has(e.id), n++)).join('')}</div></div>` : ''}
       <p class="tiny muted" style="text-align:center">Times are Danish time. Check the event page for the latest time, price and availability.</p>`;
-  const sources = feed?.sources.length
-    ? feed.sources.map(s => `<a class="link" href="${esc(s.url)}" ${ext}>${esc(s.name)}</a>`).join(', ')
-    : '';
+  // Credit the sources behind what's on screen, and say when one couldn't be refreshed.
+  const shown = new Set(base.map(e => e.sourceId));
+  const sources = (feed?.sources ?? [])
+    .filter(s => ev.savedOnly || shown.has(s.id))
+    .map(
+      s =>
+        `<a class="link" href="${esc(s.url)}" ${ext}>${esc(s.name)}</a>${s.stale ? ' <span class="muted">(may be out of date)</span>' : ''}`,
+    )
+    .join(', ');
   const meta = feed
     ? `<p class="tiny muted feed-meta">${icon('RefreshCw', 13, 'var(--muted)')}<span>Updated ${esc(updatedAgo(feed.generatedAt))}${sources ? ` · from ${sources}` : ''}</span></p>`
     : '';

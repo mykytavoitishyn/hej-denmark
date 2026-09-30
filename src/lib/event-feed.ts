@@ -70,7 +70,8 @@ function normalizeSource(raw: unknown): EventSourceInfo | null {
   const id = str(s.id, 40),
     name = str(s.name, 80),
     url = webUrl(s.url);
-  return id && name && url ? { id, name, url } : null;
+  if (!id || !name || !url) return null;
+  return s.stale === true ? { id, name, url, stale: true } : { id, name, url };
 }
 
 /** Reads the events file. Invalid events are dropped one by one; a file without the basic shape is rejected. */

@@ -133,6 +133,8 @@ export interface EventSourceInfo {
   id: string;
   name: string;
   url: string;
+  /** The last refresh couldn't reach this source, so its events are from an earlier one. */
+  stale?: boolean;
 }
 
 /** The events file the site loads: normalised events from every source, and when they were fetched. */

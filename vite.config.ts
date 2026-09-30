@@ -6,7 +6,7 @@ export default defineConfig({
   build: { target: 'es2022', sourcemap: true },
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     setupFiles: ['./tests/setup.ts'],
     coverage: {
       provider: 'v8',

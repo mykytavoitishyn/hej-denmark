@@ -28,16 +28,18 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
-| Script              | Purpose                                                          |
-| ------------------- | ---------------------------------------------------------------- |
-| `npm run dev`       | Start the dev server with hot reload.                            |
-| `npm run build`     | Type-check, then build to `dist/`.                               |
-| `npm run preview`   | Serve the production build locally.                              |
-| `npm test`          | Run the unit and DOM tests once (`npm run test:watch` to watch). |
-| `npm run typecheck` | Strict TypeScript check.                                         |
-| `npm run lint`      | ESLint (`lint:fix` to auto-fix).                                 |
-| `npm run format`    | Format with Prettier (`format:check` to verify).                 |
-| `npm run check`     | Everything CI runs, in one command.                              |
+| Script                 | Purpose                                                          |
+| ---------------------- | ---------------------------------------------------------------- |
+| `npm run dev`          | Start the dev server with hot reload.                            |
+| `npm run build`        | Type-check, then build to `dist/`.                               |
+| `npm run preview`      | Serve the production build locally.                              |
+| `npm test`             | Run the unit and DOM tests once (`npm run test:watch` to watch). |
+| `npm run typecheck`    | Strict TypeScript check.                                         |
+| `npm run lint`         | ESLint (`lint:fix` to auto-fix).                                 |
+| `npm run format`       | Format with Prettier (`format:check` to verify).                 |
+| `npm run check`        | Everything CI runs, in one command.                              |
+| `npm run events:fetch` | Rebuild the events feed from its sources.                        |
+| `npm run links:check`  | Check that every link in the app still opens.                    |
 
 ## Project layout
 
@@ -57,6 +59,8 @@ src/
   views/              One module per screen, plus shared pieces and layout
   styles/main.css     Styles and design tokens
 tests/                Test setup and helpers
+scripts/events/       Builds public/data/events.json from its sources (npm run events:fetch)
+scripts/check-links.mjs  Checks that every link in the app still opens
 ```
 
 ## How it works
@@ -83,8 +87,25 @@ Plan steps, phases, offices and official links live in `src/data/`. Adding or ch
 `src/data/plan.ts` lists each step with the conditions it applies to (`applies_to`) and the steps it needs first
 (`requires`).
 
-Events are a snapshot of KultuNaut listings saved on 27 September 2026 (`src/data/events.ts`). Once every listing
-in a city has passed, the app shows recurring ideas instead. Refresh the snapshot to keep events current.
+Events live in `public/data/events.json`, which `npm run events:fetch` rebuilds (Node 22.18 or newer). A GitHub
+Actions workflow (`.github/workflows/events.yml`) runs it every morning and commits the result. It keeps the next 60
+days of events that help newcomers meet people and settle in:
+
+- **Public libraries** in Copenhagen, Aarhus, Odense and Aalborg, through the event API every Danish library site
+  offers ([DPL CMS](https://github.com/danskernesdigitalebibliotek/dpl-cms)). Library listings are mostly in Danish, so
+  only international and English events, language cafés, talk clubs, meet-ups and communal dining are kept.
+- **Dear World**, a Copenhagen community for internationals, from its public Luma calendar.
+- **Copenhagen Expat Meetup**, from its public Meetup calendar.
+
+Sources are listed in `scripts/events/sources.ts`, and the filtering, de-duplication and checks are in
+`scripts/events/pipeline.ts`. No images are taken, every event links back to its organiser, and the app credits each
+source. Sites that don't allow reuse, such as KultuNaut without an agreement, Eventbrite and Facebook, aren't used.
+If a source can't be reached, its events from the last run stay, marked as possibly out of date. The script refuses
+to write a feed the app wouldn't accept, or one far smaller than the last (`--force` overrides that after you've
+checked why). Once every listing in a city has passed, the app shows recurring ideas instead.
+
+Links are checked weekly by `npm run links:check` (`.github/workflows/links.yml`), which fails when an official page
+moves.
 
 The budget calculator's prices, rents, 2026 tax rates, SU rate and residence permit fees live in `src/data/budget.ts`,
 with the sources the page shows. They were checked in September 2026. Update them each January, when tax rates, SU,
