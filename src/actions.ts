@@ -1,4 +1,5 @@
 import { AVATAR_COLORS, AVATAR_EMOJI } from './data/avatars.js';
+import { AMOUNT_FIELDS, budgetDefaults, withAmount, withChoice, withToggle } from './lib/budget.js';
 import { icon } from './lib/dom.js';
 import { dateLabel, eventsIn, timeLabel } from './lib/event-feed.js';
 import { activeSteps, currentPhase, journeyPhases } from './lib/plan.js';
@@ -19,6 +20,7 @@ import {
 import { requireProfile, S } from './state/state.js';
 import type {
   AvatarColor,
+  BudgetInputs,
   CityId,
   EventCategory,
   EventItem,
@@ -28,6 +30,7 @@ import type {
   RouteName,
   WhenFilter,
 } from './types.js';
+import { budgetAnnouncement, budgetParts, ensureBudget, fieldValue } from './views/budget.js';
 import { withRewards } from './views/celebrate.js';
 import { showToast } from './views/shared.js';
 
@@ -49,6 +52,37 @@ function focusQuestion(): void {
   document.getElementById('q-title')?.focus({ preventScroll: true });
 }
 
+/** Renders, then puts focus back on the control that was used, since rendering replaces it. */
+function renderKeepingFocus(el: HTMLElement): void {
+  const sel = ['act', 'name', 'value', 'id'].map(k => (el.dataset[k] ? `[data-${k}="${el.dataset[k]}"]` : '')).join('');
+  render();
+  document.querySelector<HTMLElement>(sel)?.focus({ preventScroll: true });
+}
+
+/** Keeps the budget answers, on this device for guests like the rest of their plan. */
+function setBudget(b: BudgetInputs): void {
+  S.bud = b;
+  saveGuestData('budget', b);
+}
+
+let budgetAnnounce: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * Updates the budget page's numbers while someone types. Only the results are redrawn, so the field they're typing
+ * in keeps its focus and cursor. Screen readers hear the new total once typing pauses.
+ */
+function refreshBudget(): void {
+  for (const [id, html] of Object.entries(budgetParts())) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+  clearTimeout(budgetAnnounce);
+  budgetAnnounce = setTimeout(() => {
+    const live = document.getElementById('bud-live');
+    if (live) live.textContent = budgetAnnouncement();
+  }, 800);
+}
+
 function finishOnboarding(): void {
   const profile = profileFromDraft(S.onb.draft, { name: S.onb.name, arrivalDate: S.onb.arrivalDate });
   if (!profile) return;
@@ -60,6 +94,7 @@ function finishOnboarding(): void {
   S.gateNote = null;
   S.ev = null;
   S.hs = null;
+  S.bud = null;
   S.welcome = true;
   S.route = { name: 'saving' };
   render();
@@ -171,6 +206,11 @@ const actions: Record<string, Action> = {
     if (name.startsWith('pe-') && S.pe) {
       S.pe = { ...S.pe, ...withAnswer(S.pe, name.slice(3) as QuestionKey, value) };
       render();
+      return;
+    }
+    if (name.startsWith('bud-')) {
+      setBudget(withChoice(ensureBudget(), name.slice(4), value));
+      renderKeepingFocus(el);
     }
   },
   step: el => go('step', { id: Number(data(el, 'id')) }),
@@ -363,6 +403,22 @@ const actions: Record<string, Action> = {
     S.hs = { city: S.hs?.city ?? S.profile?.city ?? 'copenhagen', kind };
     render();
   },
+  'bud-toggle': el => {
+    setBudget(withToggle(ensureBudget(), data(el, 'id')));
+    renderKeepingFocus(el);
+  },
+  'bud-reset': () => {
+    setBudget(budgetDefaults(S.profile));
+    showToast('budget', 'Back to typical costs', 'check', 2400);
+    render();
+  },
+  'bud-jump': el => {
+    const target = document.getElementById(data(el, 'to'));
+    if (!target) return;
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+    target.focus({ preventScroll: true });
+  },
   'pe-start': () => {
     const p = requireProfile();
     S.pe = { ...draftFromProfile(p), arrivalDate: p.arrival_date, name: p.name };
@@ -477,6 +533,10 @@ export function bindActions(root: HTMLElement): void {
       if (btn) btn.disabled = !t.value.trim();
     } else if (t.id === 'onb-name') S.onb = { ...S.onb, name: t.value };
     else if (t.id === 'pe-name' && S.pe) S.pe = { ...S.pe, name: t.value };
+    else if (t.dataset.bud) {
+      setBudget(withAmount(ensureBudget(), t.dataset.bud, t.value));
+      refreshBudget();
+    }
   });
   root.addEventListener('change', e => {
     const t = e.target as HTMLInputElement;
@@ -487,6 +547,10 @@ export function bindActions(root: HTMLElement): void {
     else if (t.id === 'avatar-file') {
       const file = t.files?.[0];
       if (file) void setPhoto(file);
+    } else if (t.dataset.bud) {
+      // Tidy the number once the person has finished typing, e.g. “4500” becomes “4,500”.
+      const key = AMOUNT_FIELDS.find(f => f === t.dataset.bud);
+      if (key) t.value = fieldValue(ensureBudget(), key);
     }
   });
   root.addEventListener('submit', e => {

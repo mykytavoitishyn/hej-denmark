@@ -3,13 +3,15 @@ import { render } from './render.js';
 import { S } from './state/state.js';
 import type { Route, RouteName } from './types.js';
 
-type HashRouteName = 'home' | 'start' | 'login' | 'events' | 'housing' | 'today' | 'journey' | 'ask' | 'profile';
+type HashRouteName =
+  'home' | 'start' | 'login' | 'events' | 'housing' | 'budget' | 'today' | 'journey' | 'ask' | 'profile';
 const HASH_ROUTES: readonly HashRouteName[] = [
   'home',
   'start',
   'login',
   'events',
   'housing',
+  'budget',
   'today',
   'journey',
   'ask',

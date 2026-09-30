@@ -605,6 +605,7 @@ svg.ic {
   border-radius: 999px;
   font-size: 15px;
   font-weight: 500;
+  white-space: nowrap;
   color: var(--muted);
   transition:
     background-color 0.15s,
@@ -652,6 +653,19 @@ svg.ic {
 .profile-link:hover,
 .profile-link[aria-current='page'] {
   border-color: var(--green);
+}
+/* Long names are cut short so the header never runs out of room. */
+.profile-name {
+  max-width: 10ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Six links only just fit above the mobile menu breakpoint, so tighten them a little on narrower screens. */
+@media (max-width: 1080px) {
+  .nav-link {
+    padding: 9px 10px;
+  }
 }
 .menu-btn {
   display: none;
@@ -2850,6 +2864,10 @@ button.rm-link:hover {
   flex-direction: column;
   gap: 6px;
 }
+.start-here li > .link {
+  grid-column: 2;
+  align-self: flex-start;
+}
 .housing-layout {
   display: grid;
   grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
@@ -2991,6 +3009,278 @@ button.rm-link:hover {
   }
   .start-here .step-num {
     grid-row: span 2;
+  }
+}
+
+/* Budget */
+.budget-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 32px;
+  align-items: start;
+  margin-bottom: 32px;
+}
+.bud-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.bud-q,
+.bud-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bud-q-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.bud-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.money {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.money .input {
+  max-width: 190px;
+  font-variant-numeric: tabular-nums;
+}
+.money-unit {
+  color: var(--muted);
+  font-size: 15px;
+  white-space: nowrap;
+}
+.opt-aside {
+  flex: none;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.option[aria-checked='true'] .opt-aside {
+  color: var(--on-green);
+}
+/* Keep prices in one column: the check mark gets its own space instead of pushing the price aside. */
+.options .option:has(.opt-aside) {
+  padding-right: 46px;
+}
+.option:has(.opt-aside) .check {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.chip-amt {
+  color: var(--muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.chip[aria-pressed='true'] .chip-amt {
+  color: var(--on-green-muted);
+}
+.bud-switch {
+  align-self: flex-start;
+  white-space: normal;
+  text-align: left;
+}
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+}
+.bud-target {
+  scroll-margin-top: calc(var(--header-h) + 20px);
+}
+.bud-target:focus {
+  outline: none;
+}
+.bud-toast:not(:empty) {
+  margin-bottom: 16px;
+}
+.budget-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.bud-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bud-total {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 4px;
+}
+.bud-num {
+  font: 600 clamp(44px, 5vw, 56px) / 1 var(--sans);
+  letter-spacing: -0.03em;
+}
+.bud-unit {
+  color: var(--muted);
+  font-weight: 600;
+}
+.bud-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+.bud-hint svg {
+  margin-top: 3px;
+}
+.bud-verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--green-soft);
+}
+.bud-verdict.short {
+  background: var(--urgent-soft);
+}
+.bud-verdict svg {
+  margin-top: 2px;
+}
+.bud-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.bud-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 12px;
+  align-items: baseline;
+}
+.bud-row-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  min-width: 0;
+  font-size: 15px;
+}
+.bud-amt {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
+}
+.bud-bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--green-soft);
+  overflow: hidden;
+}
+.bud-bar > span {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 3px 3px 0;
+  background: var(--green);
+}
+.bud-ready {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.bud-ready-num {
+  font: 600 22px/1.25 var(--sans);
+  letter-spacing: -0.01em;
+}
+.bud-sticky {
+  display: none;
+}
+.bud-startup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.bud-ready-big {
+  font: 600 clamp(30px, 3.4vw, 38px) / 1 var(--sans);
+  letter-spacing: -0.02em;
+}
+.bud-list {
+  border-top: 1px solid var(--line);
+}
+.bud-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.bud-tips {
+  margin-bottom: 32px;
+}
+.bud-tips:empty {
+  display: none;
+}
+.bud-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 88px;
+}
+.bud-src-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+}
+.bud-src-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+@media (min-width: 1001px) and (min-height: 760px) {
+  .budget-side {
+    position: sticky;
+    top: calc(var(--header-h) + 20px + env(safe-area-inset-top, 0px));
+  }
+}
+@media (max-width: 1000px) {
+  .budget-layout {
+    grid-template-columns: 1fr;
+  }
+  /* On one column the summary sits below the questions, so a bar keeps the total in sight while answering. */
+  .bud-sticky {
+    position: sticky;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 10px 10px 18px;
+    border-radius: 18px;
+    background: var(--green-deep);
+    color: var(--on-green);
+    box-shadow: var(--shadow-md);
+  }
+}
+@media (max-width: 640px) {
+  .bud-pair,
+  .bud-src-list {
+    grid-template-columns: 1fr;
   }
 }
 

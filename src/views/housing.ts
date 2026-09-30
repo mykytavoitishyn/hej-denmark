@@ -4,6 +4,7 @@ import { CITY_LABELS } from '../data/labels.js';
 import { esc, ext, hostOf, icon, isOfficial } from '../lib/dom.js';
 import { S } from '../state/state.js';
 import type { CityId, HousingKind, HousingState, Profile } from '../types.js';
+import { goLink } from './shared.js';
 
 const CITY_CHOICES: CityId[] = ['copenhagen', 'aarhus', 'odense', 'aalborg', 'other'];
 const KIND_ORDER: HousingKind[] = ['student', 'nonprofit', 'portal', 'community', 'temporary', 'official'];
@@ -70,8 +71,12 @@ export function pageHousing() {
       </section>`;
     })
     .join('');
-  const startHere = [
-    ['Set your budget', 'Rent, deposit, prepaid rent and a conto payments for heat and water.'],
+  const startHere: [title: string, text: string, link?: string][] = [
+    [
+      'Set your budget',
+      'Rent, deposit, prepaid rent and a conto payments for heat and water.',
+      goLink('budget', 'Budget calculator', 'tiny link'),
+    ],
     ['Apply early', 'Join student housing and non-profit waiting lists as soon as you can.'],
     ['Search widely', 'Rental sites, groups and your network, with alerts switched on.'],
     ['Check before you pay', 'See the home, check the landlord and sign a written lease first.'],
@@ -83,7 +88,7 @@ export function pageHousing() {
     </div>
     <div class="chip-row" role="group" aria-label="Choose a city" style="margin-bottom:20px">${CITY_CHOICES.map(c => chip(`${c === 'other' ? 'Elsewhere' : esc(CITY_LABELS[c])}${p && p.city === c ? ' <span class="you">You</span>' : ''}`, city === c, 'hs-city', `data-id="${c}"`)).join('')}</div>
     <div class="card advice">${icon('Lightbulb', 22, 'var(--green)')}<p>${esc(advice(p, cityLabel))}</p></div>
-    <ol class="start-here" aria-label="How to find a home, step by step">${startHere.map(([t, d], i) => `<li class="card card-sm" style="--i:${i}"><span class="step-num" aria-hidden="true">${i + 1}</span><span class="strong">${esc(t)}</span><span class="tiny muted">${esc(d)}</span></li>`).join('')}</ol>
+    <ol class="start-here" aria-label="How to find a home, step by step">${startHere.map(([t, d, link], i) => `<li class="card card-sm" style="--i:${i}"><span class="step-num" aria-hidden="true">${i + 1}</span><span class="strong">${esc(t)}</span><span class="tiny muted">${esc(d)}</span>${link ?? ''}</li>`).join('')}</ol>
     <div class="housing-layout">
       <div class="col gap32 min0">
         <div class="chip-row" role="group" aria-label="Filter by type">${chip('All', hs.kind === 'all', 'hs-kind', 'data-id="all"')}${kinds.map(k => chip(esc(HOUSING_KINDS[k].label), hs.kind === k, 'hs-kind', `data-id="${k}"`)).join('')}</div>

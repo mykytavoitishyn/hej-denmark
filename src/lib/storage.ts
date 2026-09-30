@@ -48,4 +48,5 @@ export const KEY = {
   reminders: (id: string) => 'hej-denmark-reminders-guest-' + id,
   saved: (id: string) => 'hej-denmark-saved-events-guest-' + id,
   ask: (id: string) => 'hej-denmark-ask-history-guest-' + id,
+  budget: (id: string) => 'hej-denmark-budget-guest-' + id,
 };

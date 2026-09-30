@@ -16,6 +16,7 @@ Everything runs in the browser. There is no backend and no account: your plan is
 | Journey | Steps grouped into phases, filterable, with checklists, offices per city and prerequisites.   |
 | Ask Hej | Chat about settling in. Answers cite official pages only.                                     |
 | Events  | Filter by city, date and category. Save events, add them to a calendar, share them.           |
+| Budget  | Monthly costs in Copenhagen, take-home pay after tax, and the money to have ready to move in. |
 | Profile | Edit your answers. Your plan updates and completed steps stay completed.                      |
 
 ## Getting started
@@ -79,6 +80,13 @@ Plan steps, phases, offices and official links live in `src/data/`. Adding or ch
 
 Events are a snapshot of KultuNaut listings saved on 27 September 2026 (`src/data/events.ts`). Once every listing
 in a city has passed, the app shows recurring ideas instead. Refresh the snapshot to keep events current.
+
+The budget calculator's prices, rents, 2026 tax rates, SU rate and residence permit fees live in `src/data/budget.ts`,
+with the sources the page shows. They were checked in September 2026. Update them each January, when tax rates, SU,
+fares and fees change. The tax estimate (`src/lib/budget.ts`) covers Copenhagen Municipality without church tax,
+pension or other deductions. With a profile, the calculator takes who you are (studying or working, citizenship, whether
+you've arrived, a partner) from it, so the plan and budget agree. Before arrival it leads with the money to have ready;
+after arrival, with monthly spending.
 
 ## Ask Hej
 

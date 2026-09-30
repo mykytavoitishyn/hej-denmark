@@ -12,6 +12,7 @@ describe('parseHash', () => {
   it.each([
     ['#today', { name: 'today' }],
     ['#events', { name: 'events' }],
+    ['#budget', { name: 'budget' }],
     ['#step-12', { name: 'step', id: 12 }],
   ])('reads %s', (hash, route) => {
     location.hash = hash;
@@ -41,7 +42,14 @@ describe('resolveRoute', () => {
   });
 
   it('leaves public pages open to everyone', () => {
-    for (const route of [{ name: 'home' }, { name: 'login' }, { name: 'events' }, { name: 'start' }] as const) {
+    const open = [
+      { name: 'home' },
+      { name: 'login' },
+      { name: 'events' },
+      { name: 'budget' },
+      { name: 'start' },
+    ] as const;
+    for (const route of open) {
       expect(resolveRoute(route)).toEqual(route);
     }
   });

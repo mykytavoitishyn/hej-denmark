@@ -88,6 +88,14 @@ export function pageHome() {
       'Open the housing guide',
     ],
     [
+      'Wallet',
+      'Budget',
+      'Know what it will cost',
+      'Rent, food, transport and tax in Copenhagen, and how much to have ready before you move.',
+      'budget',
+      'Work out your budget',
+    ],
+    [
       'UsersRound',
       'Events',
       'Meet people in your city',

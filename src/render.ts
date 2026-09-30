@@ -2,6 +2,7 @@ import { isWide } from './lib/dom.js';
 import { planSummary } from './lib/plan.js';
 import { S } from './state/state.js';
 import { pageAsk, scrollChat } from './views/ask.js';
+import { pageBudget } from './views/budget.js';
 import { pageEvents } from './views/events.js';
 import { pageHome } from './views/home.js';
 import { pageHousing } from './views/housing.js';
@@ -49,6 +50,9 @@ export function render(): void {
       break;
     case 'housing':
       page = pageHousing();
+      break;
+    case 'budget':
+      page = pageBudget();
       break;
     case 'profile':
       page = pageProfile();

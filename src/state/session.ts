@@ -1,3 +1,4 @@
+import { normalizeBudget } from '../lib/budget.js';
 import { normalizeEvent } from '../lib/event-feed.js';
 import { planFor } from '../lib/plan.js';
 import { normalizeAvatar, normalizeProfile } from '../lib/profile.js';
@@ -5,7 +6,7 @@ import { KEY, readJSON, store, writeJSON } from '../lib/storage.js';
 import type { AskMessage, EventItem, Reminder } from '../types.js';
 import { S } from './state.js';
 
-type GuestKey = 'profile' | 'done' | 'skipped' | 'checklist' | 'reminders' | 'saved' | 'ask' | 'avatar';
+type GuestKey = 'profile' | 'done' | 'skipped' | 'checklist' | 'reminders' | 'saved' | 'ask' | 'avatar' | 'budget';
 
 /** Saves one piece of guest data to this device. Does nothing when there is no active guest. */
 export function saveGuestData(key: GuestKey, value: unknown): void {
@@ -48,6 +49,7 @@ export function loadGuest(): void {
   S.askHistory = Array.isArray(h)
     ? (h as AskMessage[]).filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.text === 'string')
     : [];
+  S.bud = normalizeBudget(readJSON<unknown>(KEY.budget(id), null));
   buildPlan();
 }
 
@@ -78,6 +80,7 @@ export function leaveGuest(): void {
     avatarError: null,
     ev: null,
     hs: null,
+    bud: null,
     openPhases: null,
     phaseKey: null,
     selStep: null,

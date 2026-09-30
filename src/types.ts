@@ -173,8 +173,57 @@ export interface Reminder {
   notificationId: string | null;
 }
 
+export type BudgetRole = 'study' | 'work';
+export type BudgetCitizen = 'eu' | 'non-eu';
+export type BudgetHome = 'dorm' | 'room' | 'studio' | 'flat1' | 'flat2';
+export type BudgetTransport = 'bike' | 'mix' | 'pass';
+/** How much someone spends on food, or on going out. */
+export type BudgetLevel = 'low' | 'mid' | 'high';
+export type BudgetExtra = 'phone' | 'insurance' | 'gym' | 'streaming' | 'trips' | 'akasse';
+
+/** Everything the budget calculator asks. Amounts are whole kroner a month. */
+export interface BudgetInputs {
+  role: BudgetRole;
+  /** EU, EEA, Swiss or Nordic citizens, or everyone else, who needs a residence permit and rarely gets SU. */
+  citizen: BudgetCitizen;
+  /** Already living in Denmark. Before arriving, the money needed to move in matters most. */
+  arrived: boolean;
+  /** Rent and bills are split with a partner. */
+  shared: boolean;
+  home: BudgetHome;
+  /** Rent for the whole home. */
+  rent: number;
+  billsIncluded: boolean;
+  transport: BudgetTransport;
+  food: BudgetLevel;
+  social: BudgetLevel;
+  extras: BudgetExtra[];
+  /** Any other monthly costs. */
+  other: number;
+  /** Salary before tax. Only used when working. */
+  salary: number;
+  researcher: boolean;
+  /** Gets SU, the state education grant. Only used when studying. */
+  su: boolean;
+  jobHours: number;
+  wage: number;
+  /** Savings, family or a scholarship, already after tax. */
+  otherIncome: number;
+}
+
 export type RouteName =
-  'home' | 'start' | 'saving' | 'login' | 'today' | 'journey' | 'step' | 'ask' | 'events' | 'housing' | 'profile';
+  | 'home'
+  | 'start'
+  | 'saving'
+  | 'login'
+  | 'today'
+  | 'journey'
+  | 'step'
+  | 'ask'
+  | 'events'
+  | 'housing'
+  | 'budget'
+  | 'profile';
 export type Route = { name: Exclude<RouteName, 'step'> } | { name: 'step'; id: number };
 
 export interface Choice {
@@ -182,6 +231,8 @@ export interface Choice {
   label: string;
   /** A short second line under the label. */
   desc?: string;
+  /** A short value at the end of the row, such as a price. */
+  aside?: string;
   icon?: IconName;
 }
 
@@ -281,6 +332,8 @@ export interface State {
   ev: EventsState | null;
   events: FeedState;
   hs: HousingState | null;
+  /** The budget calculator's answers. Null until the calculator is opened, then filled in from the profile. */
+  bud: BudgetInputs | null;
   ask: { pending: boolean; streaming: string; error: string | null; input: string };
   todayAsk: string;
   toast: Toast | null;

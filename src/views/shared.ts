@@ -46,13 +46,20 @@ export const goLink = (to: RouteName, label: string, cls = 'link', arrow = true)
 /**
  * A group of single-choice buttons. Choices with a description are stacked one per row so the text has room;
  * shorter ones sit in a grid. Numbers let keyboard users answer with 1, 2, 3…
+ * Pass `labelledBy`, the id of the question above, so screen readers announce what the choices are for.
  */
-export function options(name: string, choices: Choice[], value: string | undefined, cls = ''): string {
+export function options(
+  name: string,
+  choices: Choice[],
+  value: string | undefined,
+  cls = '',
+  labelledBy?: string,
+): string {
   const layout = cls || (choices.some(c => c.desc) ? 'stack' : '');
-  return `<div class="options ${layout}" role="radiogroup">${choices
+  return `<div class="options ${layout}" role="radiogroup"${labelledBy ? ` aria-labelledby="${labelledBy}"` : ''}>${choices
     .map((c, i) => {
       const sel = value === c.value;
-      return `<button type="button" class="option" role="radio" aria-checked="${sel}" data-act="opt" data-name="${name}" data-value="${esc(c.value)}" style="--i:${i}">${c.icon ? `<span class="icon-circle sm">${icon(c.icon, 20)}</span>` : ''}<span class="col min0 flex1"><span>${esc(c.label)}</span>${c.desc ? `<span class="opt-desc">${esc(c.desc)}</span>` : ''}</span>${sel ? `<span class="check">${icon('Check', 18, 'currentColor', { stroke: 2.5 })}</span>` : name === 'onb' ? `<kbd class="opt-key" aria-hidden="true">${i + 1}</kbd>` : ''}</button>`;
+      return `<button type="button" class="option" role="radio" aria-checked="${sel}" data-act="opt" data-name="${name}" data-value="${esc(c.value)}" style="--i:${i}">${c.icon ? `<span class="icon-circle sm">${icon(c.icon, 20)}</span>` : ''}<span class="col min0 flex1"><span>${esc(c.label)}</span>${c.desc ? `<span class="opt-desc">${esc(c.desc)}</span>` : ''}</span>${c.aside ? `<span class="opt-aside">${esc(c.aside)}</span>` : ''}${sel ? `<span class="check">${icon('Check', 18, 'currentColor', { stroke: 2.5 })}</span>` : name === 'onb' ? `<kbd class="opt-key" aria-hidden="true">${i + 1}</kbd>` : ''}</button>`;
     })
     .join('')}</div>`;
 }

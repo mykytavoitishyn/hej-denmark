@@ -221,6 +221,94 @@ describe('with a plan', () => {
   });
 });
 
+describe('budget calculator', () => {
+  const total = () => root.querySelector('.bud-num')?.textContent;
+  const type = (selector: string, value: string) => {
+    const input = root.querySelector<HTMLInputElement>(selector);
+    if (!input) throw new Error(`No field ${selector}`);
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    return input;
+  };
+
+  it('is open to everyone and starts from typical student costs', () => {
+    go('budget');
+    expect(heading()).toBe('Your Copenhagen budget');
+    expect(total()).toBe('9,380');
+    expect(root.textContent).toContain('Money to have ready when you arrive');
+  });
+
+  it('updates the estimate when a home is picked, and keeps focus on the choice', () => {
+    go('budget');
+    click('[data-act="opt"][data-name="bud-home"][data-value="room"]');
+    expect(root.querySelector<HTMLInputElement>('#bud-rent')?.value).toBe('6,000');
+    expect(total()).toBe('10,880');
+    expect(document.activeElement?.getAttribute('data-value')).toBe('room');
+  });
+
+  it('recalculates while typing without replacing the field', () => {
+    go('budget');
+    const field = type('#bud-rent', '5000');
+    expect(root.querySelector('#bud-rent')).toBe(field);
+    expect(total()).toBe('9,880');
+    field.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(field.value).toBe('5,000');
+  });
+
+  it('estimates take-home pay and what’s left over', () => {
+    go('budget');
+    click('[data-act="opt"][data-name="bud-role"][data-value="work"]');
+    type('#bud-salary', '40000');
+    expect(root.querySelector('.bud-verdict')?.textContent).toContain('17,540 kr left each month');
+    expect(root.textContent).toContain('13,380 kr in tax');
+  });
+
+  it('switches from moving-in money to monthly spending once you’ve arrived', () => {
+    const startup = () => root.querySelector('#bud-startup')?.textContent ?? '';
+    go('budget');
+    click('[data-act="opt"][data-name="bud-citizen"][data-value="non-eu"]');
+    expect(root.textContent).toContain('up to 90 hours a month');
+    expect(startup()).toContain('Residence permit fee');
+    expect(startup()).toContain('Your first month');
+    click('[data-act="opt"][data-name="bud-arrived"][data-value="yes"]');
+    expect(startup()).toContain('If you move to a new home');
+    expect(startup()).not.toContain('Residence permit fee');
+    expect(startup()).not.toContain('Your first month');
+  });
+
+  it('suggests a cheaper home only when money runs short, and one that suits the person', () => {
+    const tips = () => root.querySelector('#bud-tips')?.textContent ?? '';
+    go('budget');
+    click('[data-act="opt"][data-name="bud-role"][data-value="work"]');
+    click('[data-act="opt"][data-name="bud-home"][data-value="flat1"]');
+    type('#bud-salary', '40000');
+    expect(tips()).not.toContain('Rent is the big one');
+    type('#bud-salary', '15000');
+    expect(tips()).toContain('A studio costs about 9,000 kr');
+    expect(tips()).not.toContain('dorm');
+  });
+
+  it('starts over from the typical costs', () => {
+    go('budget');
+    click('[data-act="opt"][data-name="bud-food"][data-value="high"]');
+    click('[data-act="bud-reset"]');
+    expect(S.bud?.food).toBe('low');
+    expect(root.textContent).toContain('Back to typical costs');
+  });
+
+  it('takes who you are from the profile and remembers the budget after a reload', () => {
+    signIn(profile({ move_reason: 'student', study_type: 'degree', job_status: null, stage: 'soon' }));
+    go('budget');
+    expect(root.querySelector('[data-name="bud-role"]')).toBeNull();
+    expect(root.querySelector('.tiles')?.textContent).toContain('Not yet');
+    click('[data-act="opt"][data-name="bud-food"][data-value="high"]');
+    click('[data-act="bud-toggle"][data-id="gym"]');
+    Object.assign(S, { bud: null, profile: null, guestId: null });
+    loadGuest();
+    expect(S.bud).toMatchObject({ food: 'high', extras: ['phone', 'insurance', 'gym'] });
+  });
+});
+
 describe('events without a plan', () => {
   it('asks people to build a plan before saving', () => {
     go('events');
@@ -234,7 +322,7 @@ describe('every screen renders cleanly for every kind of newcomer', () => {
   const moves: Profile['move_reason'][] = ['student', 'work', 'other'];
   const groups: Profile['residency_group'][] = ['eu-eea', 'non-eu'];
   const cities: Profile['city'][] = ['copenhagen', 'aarhus', 'odense', 'aalborg', 'other'];
-  const screens: RouteName[] = ['today', 'journey', 'ask', 'events', 'housing', 'profile'];
+  const screens: RouteName[] = ['today', 'journey', 'ask', 'events', 'housing', 'budget', 'profile'];
 
   for (const move_reason of moves)
     for (const residency_group of groups)
