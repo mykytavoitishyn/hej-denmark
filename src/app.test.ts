@@ -221,6 +221,72 @@ describe('with a plan', () => {
   });
 });
 
+describe('arriving in Denmark', () => {
+  /** A local calendar date n days from today, as the profile stores it. */
+  const day = (n: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  it('asks whether you’ve arrived once the date comes, then about your CPR number', () => {
+    signIn(profile({ stage: 'soon', arrival_date: day(-1) }));
+    go('today');
+    expect(root.textContent).toContain('Velkommen til Danmark!');
+    click('[data-act="arrive-yes"]');
+    expect(S.profile?.stage).toBe('arrived');
+    expect(root.textContent).toContain('Do you have a CPR number yet?');
+    click('[data-act="arrive-cpr"][data-value="no"]');
+    expect(S.profile?.has_cpr).toBe(false);
+    expect(root.querySelector('.checkin')).toBeNull();
+    expect(S.plan.some(s => s.slug === 'cpr')).toBe(true);
+    expect(localStorage.getItem(KEY.profile(S.guestId ?? ''))).toContain('"stage":"arrived"');
+  });
+
+  it('opens the profile to change the date instead', () => {
+    signIn(profile({ stage: 'soon', arrival_date: day(0) }));
+    go('today');
+    click('[data-act="arrive-change"]');
+    expect(heading()).toBe('Profile');
+    expect(S.pe?.arrivalDate).toBe(day(0));
+  });
+
+  it('doesn’t ask before the arrival date', () => {
+    signIn(profile({ stage: 'soon', arrival_date: day(10) }));
+    go('today');
+    expect(root.querySelector('.checkin')).toBeNull();
+  });
+
+  it('treats a planned move as arriving soon once it’s within a month', () => {
+    signIn(profile({ stage: 'planning', arrival_date: day(60) }));
+    expect(S.plan.find(s => s.slug === 'documents')?.priority).toBe('Soon');
+    signIn(profile({ stage: 'planning', arrival_date: day(20) }));
+    expect(S.plan.find(s => s.slug === 'documents')?.priority).toBe('Urgent');
+  });
+
+  it('starts Events from the arrival date, and can show every date', () => {
+    const at = (n: number) => new Date(Date.now() + n * 864e5).toISOString();
+    setFeed(
+      feed([
+        event({ id: 'cph-early', title: 'Harbour walk', startsAt: at(2) }),
+        event({ id: 'cph-late', title: 'Language café', category: 'learning', startsAt: at(9) }),
+      ]),
+    );
+    signIn(profile({ stage: 'soon', arrival_date: day(5) }));
+    go('events');
+    expect(root.textContent).toContain('Language café');
+    expect(root.textContent).not.toContain('Harbour walk');
+    click('[data-act="ev-when"][data-id="all"]');
+    expect(root.textContent).toContain('Harbour walk');
+  });
+
+  it('suggests questions about getting ready before the move', () => {
+    signIn(profile({ stage: 'soon', arrival_date: day(10) }));
+    go('today');
+    expect(root.textContent).toContain('Which documents should I bring?');
+  });
+});
+
 describe('budget calculator', () => {
   const total = () => root.querySelector('.bud-num')?.textContent;
   const type = (selector: string, value: string) => {

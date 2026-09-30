@@ -1,7 +1,17 @@
 import { CAT_ICONS, CAT_LABELS, CAT_ORDER, EVENT_CITIES, MEET_IDEAS, WHEN_OPTS } from '../data/events.js';
 import { esc, ext, hostOf, icon } from '../lib/dom.js';
-import { calendarLink, dateLabel, eventsIn, isUpcoming, timeLabel, updatedAgo, whenMatch } from '../lib/event-feed.js';
+import {
+  calendarLink,
+  dateLabel,
+  eventDays,
+  eventsIn,
+  isUpcoming,
+  timeLabel,
+  updatedAgo,
+  whenMatch,
+} from '../lib/event-feed.js';
 import { eventCity } from '../lib/events.js';
+import { arrivalLabel, upcomingArrival } from '../lib/stage.js';
 import { S } from '../state/state.js';
 import type { CityId, EventItem, EventsState } from '../types.js';
 
@@ -14,6 +24,7 @@ function ensureEventState(): EventsState {
       when: 'all',
       cat: 'all',
       savedOnly: false,
+      fromArrival: upcomingArrival(S.profile) !== null,
       notice: null,
     };
   return S.ev;
@@ -61,7 +72,15 @@ export function pageEvents() {
   const cityLabel = EVENT_CITIES.find(c => c.id === ev.city)?.label ?? 'Denmark';
   const base = ev.savedOnly ? S.saved : eventsIn(feed, ev.city);
   const cats = CAT_ORDER.filter(c => base.some(e => e.category === c));
-  const list = base.filter(e => whenMatch(e, ev.when) && (ev.cat === 'all' || e.category === ev.cat));
+  // Before someone arrives, events from their arrival date are the ones they can go to.
+  const arrival = upcomingArrival(S.profile);
+  const fromArrival = ev.fromArrival && arrival !== null && !ev.savedOnly;
+  const list = base.filter(
+    e =>
+      (!fromArrival || eventDays(e)[1] >= (arrival ?? '')) &&
+      whenMatch(e, ev.when) &&
+      (ev.cat === 'all' || e.category === ev.cat),
+  );
   const dated = list.filter(e => e.kind === 'event'),
     ongoing = list.filter(e => e.kind === 'ongoing');
   const savedIds = new Set(S.saved.map(e => e.id));
@@ -74,8 +93,10 @@ export function pageEvents() {
     body = `<div class="ev-grid" role="progressbar" aria-label="Loading events in ${esc(cityLabel)}">${evSkeleton().repeat(4)}</div>`;
   else if (!ev.savedOnly && !feed)
     body = `<div class="card empty">${icon('CloudOff', 30, 'var(--muted)')}<h2 class="h4">Events couldn’t load</h2><p class="muted">Check your connection and try again. The places below list events too.</p><button class="btn btn-secondary btn-sm" data-act="ev-refresh">Try again</button></div>`;
+  else if (!list.length && fromArrival && arrival && ev.cat === 'all')
+    body = `<div class="card empty">${icon('CalendarDays', 30, 'var(--muted)')}<h2 class="h4">Nothing listed from ${esc(arrivalLabel(arrival, { weekday: false }))} yet</h2><p class="muted">Listings usually appear a few weeks ahead. Check back closer to your move, or see what’s on now.</p><button class="btn btn-secondary btn-sm" data-act="ev-when" data-id="all">Show all dates</button></div>`;
   else if (!list.length) {
-    const filtered = ev.when !== 'all' || ev.cat !== 'all';
+    const filtered = ev.when !== 'all' || ev.cat !== 'all' || fromArrival;
     body = `<div class="card empty">${icon('CalendarDays', 30, 'var(--muted)')}<h2 class="h4">${ev.savedOnly ? 'No saved events yet' : filtered ? 'No events match these filters' : `No events listed in ${esc(cityLabel)} right now`}</h2><p class="muted">${ev.savedOnly ? 'Tap the heart on an event to save it here.' : filtered ? 'Try another date or category.' : 'Try another city, or one of the places below.'}</p>${ev.savedOnly || filtered ? `<button class="btn btn-secondary btn-sm" data-act="ev-clear">Clear filters</button>` : ''}</div>`;
   } else
     body = `${dated.length ? `<div class="ev-grid">${dated.map(e => eventCard(e, savedIds.has(e.id), n++)).join('')}</div>` : ''}
@@ -92,13 +113,13 @@ export function pageEvents() {
     (status === 'error' && feed ? `Couldn’t refresh just now, so these are from ${updatedAgo(feed.generatedAt)}.` : '');
   return `<div class="container">
     <div class="page-head">
-      <div class="col gap10"><p class="eyebrow">Explore ${esc(cityLabel)}</p><h1 class="h1">Events</h1><p class="lead">Meet people and find things to do in your city.</p>${meta}</div>
+      <div class="col gap10"><p class="eyebrow">Explore ${esc(cityLabel)}</p><h1 class="h1">Events</h1><p class="lead">${arrival ? `Meet people and find things to do. You arrive on ${esc(arrivalLabel(arrival))}, so this starts from then.` : 'Meet people and find things to do in your city.'}</p>${meta}</div>
       <button class="btn btn-outline${loading ? ' is-loading' : ''}" data-act="ev-refresh"${loading ? ' disabled aria-busy="true"' : ''}>${icon('RefreshCw', 17, 'var(--green)')}<span>${loading ? 'Refreshing…' : 'Refresh'}</span></button>
     </div>
     <div class="events-layout">
       <aside class="filters" aria-label="Filter events">
         <div><p class="filter-title">${icon('MapPin', 15, 'var(--muted)')}City</p><div class="chip-row">${EVENT_CITIES.map(c => chip(`${esc(c.label)}${c.id === ev.profileCity ? ' <span class="you">You</span>' : ''}`, ev.city === c.id && !ev.savedOnly, 'ev-city', `data-id="${c.id}"`)).join('')}</div></div>
-        <div><p class="filter-title">${icon('Clock3', 15, 'var(--muted)')}When</p><div class="chip-row">${WHEN_OPTS.map(w => chip(esc(w.label), ev.when === w.id, 'ev-when', `data-id="${w.id}"`)).join('')}</div></div>
+        <div><p class="filter-title">${icon('Clock3', 15, 'var(--muted)')}When</p><div class="chip-row">${arrival ? chip(`From ${esc(arrivalLabel(arrival, { weekday: false }))}`, fromArrival, 'ev-arrival') : ''}${WHEN_OPTS.map(w => chip(esc(w.label), !fromArrival && ev.when === w.id, 'ev-when', `data-id="${w.id}"`)).join('')}</div></div>
         <div><p class="filter-title">${icon('SlidersHorizontal', 15, 'var(--muted)')}Show</p><div class="chip-row">${chip('All events', !ev.savedOnly, 'ev-all')}${chip('Saved' + (S.saved.length ? ` · ${S.saved.length}` : ''), ev.savedOnly, 'ev-saved')}${cats.map(c => chip(esc(CAT_LABELS[c]), ev.cat === c, 'ev-cat', `data-id="${c}"`)).join('')}</div></div>
         <p class="tiny muted" id="ev-notice" aria-live="polite"${notice ? '' : ' hidden'}>${esc(notice)}</p>
       </aside>

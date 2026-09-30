@@ -99,10 +99,22 @@ describe('offlineAnswer', () => {
       'how do I meet people',
       'learn danish',
       'residence permit',
+      'what do I do in my first week',
+      'which documents should I bring',
       'zzz',
     ];
     for (const q of questions)
       for (const s of offlineAnswer(q, me, plan).sources) expect(isOfficial(s.url), `${q}: ${s.url}`).toBe(true);
+  });
+
+  it('walks through the first week, naming the local office', () => {
+    const res = offlineAnswer('What do I do in my first week?', me, plan);
+    expect(res.answer).toContain('CPR number');
+    expect(res.answer).toContain('International House Copenhagen');
+  });
+
+  it('lists the documents to bring', () => {
+    expect(offlineAnswer('Which documents should I bring?', me, plan).answer).toContain('passport');
   });
 
   it('gives the student work limit from the permit rules', () => {

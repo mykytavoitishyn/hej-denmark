@@ -1,6 +1,7 @@
 import { normalizeBudget } from '../lib/budget.js';
 import { normalizeEvent } from '../lib/event-feed.js';
 import { planFor } from '../lib/plan.js';
+import { withLiveStage } from '../lib/stage.js';
 import { normalizeAvatar, normalizeProfile } from '../lib/profile.js';
 import { KEY, readJSON, store, writeJSON } from '../lib/storage.js';
 import type { AskMessage, EventItem, Reminder } from '../types.js';
@@ -81,6 +82,7 @@ export function leaveGuest(): void {
     ev: null,
     hs: null,
     bud: null,
+    arrivalStep: null,
     openPhases: null,
     phaseKey: null,
     selStep: null,
@@ -90,7 +92,7 @@ export function leaveGuest(): void {
 }
 
 export function buildPlan(): void {
-  S.plan = S.profile ? planFor(S.profile, S.done, S.skipped) : [];
+  S.plan = S.profile ? planFor(withLiveStage(S.profile), S.done, S.skipped) : [];
 }
 
 /** Marks a step done or not done. Returns false when the step is missing or still locked. */

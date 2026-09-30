@@ -67,6 +67,11 @@ tests/                Test setup and helpers
   handler in `actions.ts`, so views never attach handlers themselves.
 - **Routing.** Hash routes (`#today`, `#step-6`) work on any static host. Screens that need a plan send people
   without one to the plan builder.
+- **Where you are in your move.** The profile records whether someone is still planning, arriving soon or already
+  here (`src/lib/stage.ts`). A planned move counts as arriving soon once the arrival date is within a month. Arriving
+  is never assumed: when the date comes, Today asks whether the person is here, then about their CPR number. Before
+  arrival, Events starts from the arrival date, Ask Hej suggests questions about getting ready and Budget leads with
+  the money to have ready.
 - **Persistence.** Guest data lives in `localStorage`, with an in-memory fallback when storage is blocked.
   Stored data is treated as untrusted and validated on load.
 - **Safety.** Everything interpolated into HTML goes through `esc()`. Assistant text is rendered by a small

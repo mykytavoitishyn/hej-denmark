@@ -339,7 +339,11 @@ const actions: Record<string, Action> = {
     render();
   },
   'ev-when': el => {
-    patchEvents({ when: data(el, 'id') as WhenFilter });
+    patchEvents({ when: data(el, 'id') as WhenFilter, fromArrival: false });
+    render();
+  },
+  'ev-arrival': () => {
+    patchEvents({ when: 'all', fromArrival: true });
     render();
   },
   'ev-all': () => {
@@ -356,7 +360,7 @@ const actions: Record<string, Action> = {
     render();
   },
   'ev-clear': () => {
-    patchEvents({ when: 'all', cat: 'all', savedOnly: false });
+    patchEvents({ when: 'all', cat: 'all', savedOnly: false, fromArrival: false });
     render();
   },
   'ev-refresh': () => {
@@ -418,6 +422,37 @@ const actions: Record<string, Action> = {
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     target.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
     target.focus({ preventScroll: true });
+  },
+  'arrive-yes': () => {
+    const p = requireProfile();
+    withRewards(() => {
+      S.profile = { ...p, stage: 'arrived' };
+      saveGuestData('profile', S.profile);
+      afterProfileChange();
+    });
+    S.arrivalStep = 'cpr';
+    S.ev = null;
+    render();
+    document.getElementById('checkin-title')?.focus({ preventScroll: true });
+  },
+  'arrive-cpr': el => {
+    const p = requireProfile();
+    withRewards(() => {
+      S.profile = { ...p, has_cpr: data(el, 'value') === 'yes' };
+      saveGuestData('profile', S.profile);
+      afterProfileChange();
+    });
+    S.arrivalStep = null;
+    showToast('today', 'Velkommen til Danmark! Your plan now starts from here.', 'sparkles', 3200);
+    render();
+  },
+  'arrive-change': () => {
+    const p = requireProfile();
+    S.pe = { ...draftFromProfile(p), arrivalDate: p.arrival_date, name: p.name };
+    S.peError = null;
+    S.avatarOpen = false;
+    go('profile');
+    document.getElementById('arrival-date')?.focus();
   },
   'pe-start': () => {
     const p = requireProfile();

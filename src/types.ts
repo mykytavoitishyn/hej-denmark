@@ -277,6 +277,8 @@ export interface EventsState {
   when: WhenFilter;
   cat: EventCategory | 'all';
   savedOnly: boolean;
+  /** Show only events from the person's arrival date, while they haven't arrived yet. */
+  fromArrival: boolean;
   notice: string | null;
 }
 
@@ -334,6 +336,8 @@ export interface State {
   hs: HousingState | null;
   /** The budget calculator's answers. Null until the calculator is opened, then filled in from the profile. */
   bud: BudgetInputs | null;
+  /** After someone confirms they've arrived, Today asks whether they have a CPR number yet. */
+  arrivalStep: 'cpr' | null;
   ask: { pending: boolean; streaming: string; error: string | null; input: string };
   todayAsk: string;
   toast: Toast | null;

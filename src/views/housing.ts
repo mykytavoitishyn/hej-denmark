@@ -22,8 +22,16 @@ export function resourcesFor(city: CityId, kind: HousingKind | 'all'): HousingRe
   return [...list.filter(r => r.cities), ...list.filter(r => !r.cities)];
 }
 
-/** A short, personal pointer to where this person should start. */
+/** A short, personal pointer to where this person should start. Searching from abroad gets a safety note. */
 function advice(p: Profile | null, city: string): string {
+  const fromAbroad =
+    p && p.stage !== 'arrived' && p.housing !== 'settled'
+      ? ' From abroad, ask for a live video viewing and a signed lease before you pay anything.'
+      : '';
+  return startAdvice(p, city) + fromAbroad;
+}
+
+function startAdvice(p: Profile | null, city: string): string {
   if (!p)
     return `Start with student housing if you’re studying, then rental sites and groups. Always read the scam signs first.`;
   if (p.housing === 'settled')

@@ -231,6 +231,20 @@ export function offlineAnswer(q: string, p: Profile, plan: PlanStep[], events: E
       }),
     ],
     [
+      /first (day|days|week)|when i (arrive|land)|just (arrived|landed)/,
+      () => ({
+        answer: `Your first week, in this order:\n- Move into the address you’ll register\n- Book an appointment with ${office ? `**${office.name}**` : 'International Citizen Service or Borgerservice'}\n- Register for your CPR number. Bring your passport, your residence document and your lease\n- Once you have a CPR number, set up MitID, a bank account and your health card\n\nYour Journey has these steps in order, with checklists.`,
+        sources: [src('https://lifeindenmark.borger.dk/theme/when-you-arrive'), ...(office ? [src(office.url)] : [])],
+      }),
+    ],
+    [
+      /documents?|papers|certificates?|what (should|do) i (bring|pack)/,
+      () => ({
+        answer: `Bring the originals, and keep digital copies somewhere safe:\n- A passport valid for your whole stay\n- Your residence permit, or what shows why you’re staying, such as a contract or admission letter\n- Your lease, for registering your address\n- Birth and marriage certificates, if family members register too\n- Diplomas and your driving licence\n\nSome foreign certificates need to be legalised or translated first, which can take weeks, so check early.`,
+        sources: [src('https://lifeindenmark.borger.dk/theme/before-moving')],
+      }),
+    ],
+    [
       /^(hej|hi|hello|hey|goddag|godmorgen)\b/,
       () => ({
         answer: `Hej! I’m here to help you settle in ${cityName}. Ask me about your next step, housing, CPR, MitID, work, or what’s on this week.`,

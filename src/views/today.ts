@@ -2,14 +2,15 @@ import { CAT_ICONS } from '../data/events.js';
 import { cityName, MOVE_LABELS, RES_LABELS } from '../data/labels.js';
 import { promptsFor } from '../data/prompts.js';
 import { esc, icon } from '../lib/dom.js';
-import { dateLabel, eventsIn, timeLabel, whenMatch } from '../lib/event-feed.js';
+import { dateLabel, eventDays, eventsIn, timeLabel, whenMatch } from '../lib/event-feed.js';
 import { eventCity } from '../lib/events.js';
 import { actionableSteps, activeSteps, journeyPhases, planSummary, prio } from '../lib/plan.js';
 import { BADGES, earnedBadges, STEP_XP } from '../lib/rewards.js';
+import { arrivalCheckDue, arrivalLabel, upcomingArrival } from '../lib/stage.js';
 import { arrivalMessage, dailyWord, greeting } from '../lib/today.js';
 import { currentLevel, rewardInput } from '../state/progress.js';
 import { S, requireProfile } from '../state/state.js';
-import type { EventItem } from '../types.js';
+import type { EventItem, Profile } from '../types.js';
 import { avatarHTML, badge, goLink, ring, roadmap, toastHTML, xpBar } from './shared.js';
 
 function miniEvent(e: EventItem): string {
@@ -20,21 +21,49 @@ function miniEvent(e: EventItem): string {
   </a>`;
 }
 
-function eventsSection(city: string, cityLabel: string): string {
+/** Events this week, or before someone arrives, events from their arrival date. */
+function eventsSection(city: string, cityLabel: string, arrival: string | null): string {
   const all = eventsIn(S.events.feed, eventCity(city));
-  const week = all.filter(e => e.kind === 'event' && whenMatch(e, 'week'));
-  const shown = (week.length ? week : all.filter(e => e.kind === 'event')).slice(0, 3);
-  const title = week.length ? `This week in ${cityLabel}` : `Coming up in ${cityLabel}`;
+  const week = arrival ? [] : all.filter(e => e.kind === 'event' && whenMatch(e, 'week'));
+  const later = all.filter(e => e.kind === 'event' && (!arrival || eventDays(e)[1] >= arrival));
+  const shown = (week.length ? week : later).slice(0, 3);
+  const title = arrival
+    ? `Your first weeks in ${cityLabel}`
+    : week.length
+      ? `This week in ${cityLabel}`
+      : `Coming up in ${cityLabel}`;
   let body: string;
   if (S.events.status === 'loading' && !S.events.feed)
     body = `<div class="mini-grid">${'<div class="card mini-ev"><div class="skeleton" style="height:18px;width:50%"></div><div class="skeleton" style="height:22px"></div><div class="skeleton" style="height:14px;width:70%"></div></div>'.repeat(3)}</div>`;
   else if (shown.length) body = `<div class="mini-grid">${shown.map(miniEvent).join('')}</div>`;
   else
-    body = `<div class="card card-sm row gap12">${icon('CalendarDays', 22, 'var(--muted)')}<p class="muted">${S.events.status === 'error' ? 'Events couldn’t load right now.' : 'No events listed here yet.'} Events has ideas for meeting people in the meantime.</p></div>`;
+    body = `<div class="card card-sm row gap12">${icon('CalendarDays', 22, 'var(--muted)')}<p class="muted">${S.events.status === 'error' ? 'Events couldn’t load right now.' : arrival ? `Events from ${esc(arrivalLabel(arrival, { weekday: false }))} show up here as your move gets closer.` : 'No events listed here yet.'} Events has ideas for meeting people in the meantime.</p></div>`;
   return `<section class="span-12 col gap16" aria-labelledby="week-title">
     <div class="row between wrap gap16"><h2 class="h3" id="week-title">🎈 ${esc(title)}</h2>${goLink('events', '<span>See all events</span>')}</div>
     ${body}
   </section>`;
+}
+
+/**
+ * Once the arrival date comes, asks whether the person has arrived, then whether they have a CPR number yet.
+ * The plan changes a lot on arrival, so it waits for them to confirm rather than switching by itself.
+ */
+function arrivalCard(p: Profile): string {
+  const card = (title: string, text: string, actions: string, focusable = false) =>
+    `<section class="card checkin span-12" aria-labelledby="checkin-title"><span class="checkin-flag" aria-hidden="true">🇩🇰</span><div class="col gap6 min0 flex1"><h2 class="h3" id="checkin-title"${focusable ? ' tabindex="-1"' : ''}>${title}</h2><p class="muted">${text}</p></div><div class="row wrap gap10">${actions}</div></section>`;
+  if (S.arrivalStep === 'cpr')
+    return card(
+      'Do you have a CPR number yet?',
+      'If you do, your plan moves on to MitID, a bank account and your health card.',
+      `<button class="btn btn-primary" data-act="arrive-cpr" data-value="yes">Yes, I have one</button><button class="btn btn-secondary" data-act="arrive-cpr" data-value="no">Not yet</button>`,
+      true,
+    );
+  if (!p.arrival_date || !arrivalCheckDue(p)) return '';
+  return card(
+    'Velkommen til Danmark!',
+    `Did you arrive on ${esc(arrivalLabel(p.arrival_date))}? Once you’re here, your plan moves on to registering, and your budget, events and suggestions follow.`,
+    `<button class="btn btn-primary" data-act="arrive-yes">Yes, I’m here</button><button class="btn btn-secondary" data-act="arrive-change">My date changed</button>`,
+  );
 }
 
 export function pageToday() {
@@ -100,6 +129,7 @@ export function pageToday() {
       <a class="pill-link" href="#profile" data-act="go" data-to="profile">${icon('MapPin', 16, 'var(--sage)')}<span>${esc(cityLabel)} · ${esc(MOVE_LABELS[p.move_reason])} · ${esc(RES_LABELS[p.residency_group])}</span></a>
     </div>
     <div class="dash stagger">
+      ${arrivalCard(p)}
       <section class="card progress-card span-5" aria-label="Settling-in progress">
         ${ring(sum.percentage)}
         <div class="col gap6 min0">
@@ -134,7 +164,7 @@ export function pageToday() {
       </section>
       ${remHTML}
       ${housingNudge}
-      ${eventsSection(p.city, cityLabel)}
+      ${eventsSection(p.city, cityLabel, upcomingArrival(p))}
       <section class="card word-card span-5" aria-labelledby="word-title">
         <h2 class="h3" id="word-title">🇩🇰 Today’s Danish</h2>
         <div class="row wrap gap10"><span class="h2" lang="da">${esc(word.word)}</span><span class="say-pill">Say it: ${esc(word.pronunciation)}</span></div>

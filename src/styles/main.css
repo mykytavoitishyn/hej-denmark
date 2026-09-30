@@ -3012,6 +3012,28 @@ button.rm-link:hover {
   }
 }
 
+/* Arrival check-in on Today */
+.checkin {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  background: var(--word-bg);
+  border-color: var(--word-border);
+}
+.checkin-flag {
+  font-size: 34px;
+  line-height: 1;
+}
+.checkin h2:focus {
+  outline: none;
+}
+@media (max-width: 640px) {
+  .checkin-flag {
+    display: none;
+  }
+}
+
 /* Budget */
 .budget-layout {
   display: grid;

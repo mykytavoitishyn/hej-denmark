@@ -28,6 +28,7 @@ export const createInitialState = (): State => ({
   events: { feed: null, status: 'idle' },
   hs: null,
   bud: null,
+  arrivalStep: null,
   ask: { pending: false, streaming: '', error: null, input: '' },
   todayAsk: '',
   toast: null,
