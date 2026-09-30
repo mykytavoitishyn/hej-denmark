@@ -80,7 +80,7 @@ export const MEET_IDEAS: MeetIdea[] = [
   {
     title: 'VisitDenmark events',
     text: 'Festivals and big events across the country.',
-    url: 'https://www.visitdenmark.com/denmark/things-do/events',
+    url: 'https://www.visitdenmark.com/denmark/things-to-do/events/event-calendar',
     icon: 'Ticket',
   },
 ];

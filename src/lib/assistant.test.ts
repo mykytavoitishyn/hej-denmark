@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { event, profile } from '../../tests/helpers.js';
 import type { AskMessage } from '../types.js';
 import { buildTurns, offlineAnswer, parseAnswer, stripSources } from './assistant.js';
+import { isOfficial } from './dom.js';
 import { nextStep, planFor } from './plan.js';
 
 const me = profile();
@@ -80,6 +81,32 @@ describe('offlineAnswer', () => {
 
   it('says hello back', () => {
     expect(offlineAnswer('hej', me, plan).answer).toContain('Hej!');
+  });
+
+  it('cites only pages on the official list', () => {
+    const questions = [
+      'what is my next step',
+      'how do I get a CPR number',
+      'MitID',
+      'is this landlord a scam',
+      'open a bank account',
+      'tax card',
+      'find a doctor',
+      'digital post',
+      'write to the kommune',
+      'can I get a student job',
+      'events this weekend',
+      'how do I meet people',
+      'learn danish',
+      'residence permit',
+      'zzz',
+    ];
+    for (const q of questions)
+      for (const s of offlineAnswer(q, me, plan).sources) expect(isOfficial(s.url), `${q}: ${s.url}`).toBe(true);
+  });
+
+  it('gives the student work limit from the permit rules', () => {
+    expect(offlineAnswer('Can I get a student job?', me, plan).answer).toContain('90 hours a month');
   });
 
   it('admits when it has no ready answer and points to the official guide', () => {

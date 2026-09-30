@@ -123,10 +123,7 @@ export function offlineAnswer(q: string, p: Profile, plan: PlanStep[], events: E
       /\bcpr\b|personal (id|number)/,
       () => ({
         answer: `Your CPR number is Denmark’s personal ID number, and most other steps depend on it.\n\nYou apply by registering your address with your municipality once you meet the requirements for your stay. Bring:\n- Housing documentation for your registered address\n- Residence documentation that applies to your stay\n- The original documents your municipality asks for${officeLine}\n\nWith a CPR number you can set up MitID, a bank account and your yellow health card.`,
-        sources: [
-          src('https://lifeindenmark.borger.dk/coming-to-denmark/cpr-bank-nemid-mitid'),
-          ...(office ? [src(office.url)] : []),
-        ],
+        sources: [src('https://lifeindenmark.borger.dk/theme/when-you-arrive'), ...(office ? [src(office.url)] : [])],
       }),
     ],
     [
@@ -135,7 +132,7 @@ export function offlineAnswer(q: string, p: Profile, plan: PlanStep[], events: E
         answer: `MitID is Denmark’s digital ID. You use it for public self-service, banking and Digital Post.\n\nYou normally need a CPR number first. Then set it up through the official MitID channels or at citizen service.\n\nUse only official MitID channels and never share your approval codes with anyone.`,
         sources: [
           src('https://www.mitid.dk/en-gb/'),
-          src('https://lifeindenmark.borger.dk/coming-to-denmark/cpr-bank-nemid-mitid'),
+          src('https://lifeindenmark.borger.dk/apps-and-digital-services/mitid'),
         ],
       }),
     ],
@@ -178,14 +175,20 @@ export function offlineAnswer(q: string, p: Profile, plan: PlanStep[], events: E
       /kommune|municipality|borgerservice|write to/,
       () => ({
         answer: `Here’s a short message you can adapt:\n\nDear Borgerservice,\nI moved to ${cityName} on [date] and would like to [register my address / book a time for a CPR number]. My name is [full name] and my address is [address]. Could you tell me which documents to bring and how to book a time?\nKind regards,\n[Name]${office ? `\n\nSend it through the contact options on the official page for **${office.name}**.` : ''}`,
-        sources: office ? [src(office.url)] : [src('https://lifeindenmark.borger.dk/coming-to-denmark')],
+        sources: office
+          ? [src(office.url)]
+          : [src('https://lifeindenmark.borger.dk/settle-in-denmark/ics-international-citizen-service')],
       }),
     ],
     [
       /work while studying|student job|part[- ]time|work (as a|while)/,
       () => ({
-        answer: `It depends on your citizenship. EU/EEA citizens can generally work in Denmark while studying.\n\nIf you’re from outside the EU/EEA, your residence permit sets whether and how much you can work, so check your permit and the rules at New to Denmark before you take a job.`,
-        sources: [src('https://www.nyidanmark.dk/')],
+        answer: `It depends on your citizenship. EU/EEA citizens can generally work in Denmark while studying.\n\nIf you’re from outside the EU/EEA, your residence permit sets whether and how much you can work. On a state-approved higher education programme, that’s usually up to 90 hours a month, and full time in June, July and August. Check your own permit before you take a job.`,
+        sources: [
+          src(
+            'https://www.nyidanmark.dk/en-GB/Words-and-concepts/SIRI/Work-permits-for-students-in-higher-educational-programmes',
+          ),
+        ],
       }),
     ],
     [
@@ -211,7 +214,7 @@ export function offlineAnswer(q: string, p: Profile, plan: PlanStep[], events: E
       /danish class|learn danish|language/,
       () => ({
         answer: `Danish classes (danskuddannelse) are arranged through your municipality once you’re registered. Check your municipality’s website or Life in Denmark for how to sign up.`,
-        sources: [src('https://lifeindenmark.borger.dk/coming-to-denmark')],
+        sources: [src('https://lifeindenmark.borger.dk/leisure-and-networking/danish-language-training')],
       }),
     ],
     [
@@ -238,7 +241,7 @@ export function offlineAnswer(q: string, p: Profile, plan: PlanStep[], events: E
   for (const [re, fn] of topics) if (re.test(t)) return { ...fn(), offline: true };
   return {
     answer: `I don’t have a ready answer for that here. Life in Denmark, the official guide for newcomers, covers most settling-in questions, and your Journey shows the steps that apply to you.`,
-    sources: [src('https://lifeindenmark.borger.dk/coming-to-denmark')],
+    sources: [src('https://lifeindenmark.borger.dk/settle-in-denmark')],
     offline: true,
   };
 }

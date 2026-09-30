@@ -1,0 +1,21 @@
+name: Links
+
+# Official sites move pages without warning. This checks every link in the app once a week and fails when one is
+# gone, so GitHub emails the maintainers before newcomers find a dead link.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm run links:check

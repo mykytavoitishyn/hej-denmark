@@ -9,8 +9,8 @@ export const CITY_OFFICES: Record<'copenhagen' | 'aarhus' | 'odense' | 'aalborg'
   },
   odense: { url: 'https://www.odense.dk/borger/borgerservice', name: 'Borgerservice, Odense Kommune' },
   aalborg: {
-    url: 'https://www.aalborg.dk/mit-liv/personlige-forhold/borgerservice',
-    name: 'Borgerservice, Aalborg Kommune',
+    url: 'https://lifeindenmark.borger.dk/settle-in-denmark/ics-international-citizen-service/ics-north-in-aalborg',
+    name: 'International Citizen Service North, Aalborg',
   },
 };
 
@@ -63,7 +63,10 @@ export const STEPS: Step[] = [
     time_needed: 'Book ahead. Processing times are listed on New to Denmark.',
     official_links: [
       { url: 'https://www.nyidanmark.dk/en-GB', label: 'New to Denmark: EU/EEA citizens' },
-      { url: 'https://lifeindenmark.borger.dk/coming-to-denmark', label: 'Life in Denmark: coming to Denmark' },
+      {
+        url: 'https://lifeindenmark.borger.dk/settle-in-denmark/residence-in-denmark/residence-in-denmark-for-eu-eea-swiss-citizens',
+        label: 'Life in Denmark: residence for EU, EEA and Swiss citizens',
+      },
     ],
   },
   {
@@ -150,7 +153,7 @@ export const STEPS: Step[] = [
     office_by_city: CITY_OFFICES,
     time_needed: 'One appointment. Book ahead, as times can fill up.',
     official_links: [
-      { url: 'https://lifeindenmark.borger.dk/coming-to-denmark/cpr-bank-nemid-mitid', label: 'Life in Denmark: CPR' },
+      { url: 'https://lifeindenmark.borger.dk/theme/when-you-arrive', label: 'Life in Denmark: when you arrive' },
     ],
   },
   {
@@ -193,10 +196,7 @@ export const STEPS: Step[] = [
     time_needed: 'Under an hour online, or one appointment.',
     official_links: [
       { url: 'https://www.mitid.dk/en-gb/', label: 'MitID' },
-      {
-        url: 'https://lifeindenmark.borger.dk/coming-to-denmark/cpr-bank-nemid-mitid',
-        label: 'Life in Denmark: MitID',
-      },
+      { url: 'https://lifeindenmark.borger.dk/apps-and-digital-services/mitid', label: 'Life in Denmark: MitID' },
     ],
   },
   {
@@ -284,7 +284,12 @@ export const STEPS: Step[] = [
     ],
     office_by_city: CITY_OFFICES,
     time_needed: '10 minutes.',
-    official_links: [{ url: 'https://lifeindenmark.borger.dk/coming-to-denmark', label: 'Life in Denmark' }],
+    official_links: [
+      {
+        url: 'https://lifeindenmark.borger.dk/settle-in-denmark/ics-international-citizen-service',
+        label: 'Life in Denmark: International Citizen Service',
+      },
+    ],
   },
   {
     id: 13,
@@ -406,7 +411,12 @@ export const STEPS: Step[] = [
     ],
     office_by_city: {},
     time_needed: 'A few hours a week.',
-    official_links: [{ url: 'https://lifeindenmark.borger.dk/', label: 'Life in Denmark: learning Danish' }],
+    official_links: [
+      {
+        url: 'https://lifeindenmark.borger.dk/leisure-and-networking/danish-language-training',
+        label: 'Life in Denmark: learning Danish',
+      },
+    ],
   },
   {
     id: 19,

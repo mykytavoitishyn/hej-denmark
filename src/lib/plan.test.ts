@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { profile } from '../../tests/helpers.js';
-import { STEPS } from '../data/plan.js';
+import { CITY_OFFICES, STEPS } from '../data/plan.js';
 import type { PlanStep } from '../types.js';
+import { isOfficial } from './dom.js';
 import { appliesTo, currentPhase, journeyPhases, nextStep, planFor, planSummary, prio, stepOffice } from './plan.js';
 
 const slugs = (plan: PlanStep[]) => plan.map(s => s.slug);
@@ -75,6 +76,20 @@ describe('planFor', () => {
     // MitID needs a CPR number, but people who already have one never see the CPR step.
     const mitid = planFor(profile({ has_cpr: true }), new Set()).find(s => s.slug === 'mitid');
     expect(mitid).toMatchObject({ locked: false, unmet: [] });
+  });
+});
+
+describe('official links', () => {
+  it('gives every step at least one link, all on the official list, so the Journey never hides them', () => {
+    for (const step of STEPS) {
+      expect(step.official_links.length, step.slug).toBeGreaterThan(0);
+      for (const l of step.official_links) expect(isOfficial(l.url), `${step.slug}: ${l.url}`).toBe(true);
+    }
+  });
+
+  it('links every citizen-service office to an official page', () => {
+    const offices = [...Object.values(CITY_OFFICES), ...STEPS.flatMap(s => Object.values(s.office_by_city))];
+    for (const office of offices) expect(isOfficial(office.url), office.name).toBe(true);
   });
 });
 
