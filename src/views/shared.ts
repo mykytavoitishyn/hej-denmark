@@ -3,6 +3,7 @@ import { initials } from '../lib/profile.js';
 import type { LevelProgress } from '../lib/rewards.js';
 import { S } from '../state/state.js';
 import type { Choice, Phase, Priority, RouteName, Toast } from '../types.js';
+import { announce } from './celebrate.js';
 
 export function badge(p: Priority): string {
   const ic = p === 'Urgent' ? 'CircleAlert' : p === 'Soon' ? 'Clock3' : 'Leaf';
@@ -10,6 +11,7 @@ export function badge(p: Priority): string {
   const cls = p === 'Urgent' ? 'badge-urgent' : p === 'Soon' ? 'badge-soon' : 'badge-later';
   return `<span class="badge ${cls}">${icon(ic, 13, col)}<span>${p}<span class="sr-only"> priority</span></span></span>`;
 }
+/** The confirmation on a screen, if there is one. Screen readers hear it from `showToast`, as this is redrawn. */
 export function toastHTML(screen: string): string {
   const t = S.toast;
   if (!t || t.screen !== screen) return '';
@@ -17,12 +19,13 @@ export function toastHTML(screen: string): string {
     t.kind === 'sparkles'
       ? icon('Sparkles', 18, 'var(--green)')
       : `<span class="pop">${icon('Check', 18, 'var(--green)', { stroke: 2.5 })}</span>`;
-  return `<div class="notice" id="toast" role="status" aria-live="polite">${ic}<span>${esc(t.text)}</span></div>`;
+  return `<div class="notice" id="toast">${ic}<span>${esc(t.text)}</span></div>`;
 }
-/** Shows a short confirmation on a screen and removes it after `ms` milliseconds. */
+/** Shows a short confirmation on a screen, reads it out to screen readers and removes it after `ms` milliseconds. */
 export function showToast(screen: string, text: string, kind: Toast['kind'], ms: number): void {
   const tok = {};
   S.toast = { screen, text, kind, tok };
+  announce(text);
   setTimeout(() => {
     if (!S.toast || S.toast.tok !== tok) return;
     S.toast = null;

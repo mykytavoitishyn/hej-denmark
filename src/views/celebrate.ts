@@ -26,6 +26,15 @@ function layer(): HTMLElement {
 /** Call once at start-up so the live region is ready before the first announcement. */
 export const initCelebrations = (): void => void layer();
 
+/** Reads a short message out to screen readers through the live region, which outlasts re-renders. */
+export function announce(text: string): void {
+  const el = document.createElement('p');
+  el.className = 'sr-only';
+  el.textContent = text;
+  layer().append(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
 /** A burst of confetti from a point on the screen, by default the middle. Skipped when motion is reduced. */
 export function confetti(x = window.innerWidth / 2, y = window.innerHeight / 3, pieces = 42): void {
   if (reducedMotion()) return;
