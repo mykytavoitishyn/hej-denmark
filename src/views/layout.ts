@@ -1,25 +1,32 @@
+import { FEATURES } from '../data/features.js';
 import { APP_URL, HELP_LINKS } from '../data/links.js';
 import { esc, ext, icon } from '../lib/dom.js';
+import { currentLevel } from '../state/progress.js';
 import { S } from '../state/state.js';
+import { avatarHTML } from './shared.js';
+
+const NAV: [id: string, label: string][] = [
+  ['today', 'Today'],
+  ['journey', 'Journey'],
+  ['housing', 'Housing'],
+  ['budget', 'Budget'],
+  ['events', 'Events'],
+  ['ask', 'Ask Hej'],
+];
 
 function navActive() {
   const n = S.route.name;
-  return n === 'step' ? 'journey' : ['today', 'journey', 'ask', 'events', 'profile'].includes(n) ? n : null;
+  return n === 'step' ? 'journey' : [...NAV.map(([id]) => id), 'profile'].includes(n) ? n : null;
 }
 export function header() {
   const active = navActive();
-  const links = [
-    ['today', 'Today'],
-    ['journey', 'Journey'],
-    ['ask', 'Ask Hej'],
-    ['events', 'Events'],
-  ];
   const cur = (id: string) => (active === id ? ' aria-current="page"' : '');
+  const lvl = FEATURES.rewards ? currentLevel() : null;
   const right = S.profile
-    ? `<a class="profile-link" href="#profile" data-act="go" data-to="profile"${cur('profile')} aria-label="Profile"><span class="avatar">${icon('User', 17)}</span><span class="hide-sm">Profile</span></a>`
+    ? `<a class="profile-link" href="#profile" data-act="go" data-to="profile"${cur('profile')} aria-label="Profile${lvl ? `, level ${lvl.lp.level.n}` : ''}">${avatarHTML('sm')}<span class="hide-sm profile-name">${S.profile.name ? esc(S.profile.name) : 'Profile'}</span>${lvl ? `<span class="lvl-pill hide-sm" aria-hidden="true">Lv ${lvl.lp.level.n}</span>` : ''}</a>`
     : `<a class="btn btn-ghost btn-sm hide-sm" href="#login" data-act="go" data-to="login">Log in</a><a class="btn btn-primary btn-sm" href="#start" data-act="go" data-to="start">Get my plan</a>`;
   const menuLinks =
-    [...links, ['profile', 'Profile']]
+    [...NAV, ['profile', 'Profile']]
       .map(
         ([id, l]) =>
           `<a href="#${id}" data-act="go" data-to="${id}"${cur(id)}>${l}${icon('ChevronRight', 18, 'var(--muted)')}</a>`,
@@ -31,7 +38,7 @@ export function header() {
   return `<header class="site-header" id="site-header">
     <div class="container header-inner">
       <a class="brand" href="#home" data-act="go" data-to="home" aria-label="Hej Denmark, home"><span class="hej">Hej</span> Denmark</a>
-      <nav class="main-nav" aria-label="Main">${links.map(([id, l]) => `<a class="nav-link" href="#${id}" data-act="go" data-to="${id}"${cur(id)}>${l}</a>`).join('')}</nav>
+      <nav class="main-nav" aria-label="Main">${NAV.map(([id, l]) => `<a class="nav-link" href="#${id}" data-act="go" data-to="${id}"${cur(id)}>${l}</a>`).join('')}</nav>
       <div class="header-actions">${right}</div>
       <button class="btn btn-secondary btn-icon btn-sm menu-btn" data-act="menu" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">${icon('Menu', 20)}</button>
     </div>
@@ -39,13 +46,7 @@ export function header() {
   </header>`;
 }
 export function footer() {
-  const plan = [
-    ['today', 'Today'],
-    ['journey', 'Journey'],
-    ['ask', 'Ask Hej'],
-    ['events', 'Events'],
-    ['profile', 'Profile'],
-  ];
+  const plan = [...NAV, ['profile', 'Profile']];
   return `<footer class="site-footer"><div class="container">
     <div class="footer-grid">
       <div class="col gap12"><a class="brand" href="#home" data-act="go" data-to="home"><span class="hej">Hej</span> Denmark</a><p style="color:var(--on-green-muted);max-width:34ch">A calm, personal plan for your first months in Denmark.</p></div>

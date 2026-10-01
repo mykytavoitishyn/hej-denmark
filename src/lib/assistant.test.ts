@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { profile } from '../../tests/helpers.js';
+import { event, profile } from '../../tests/helpers.js';
 import type { AskMessage } from '../types.js';
 import { buildTurns, offlineAnswer, parseAnswer, stripSources } from './assistant.js';
+import { isOfficial } from './dom.js';
 import { nextStep, planFor } from './plan.js';
 
 const me = profile();
@@ -82,6 +83,44 @@ describe('offlineAnswer', () => {
     expect(offlineAnswer('hej', me, plan).answer).toContain('Hej!');
   });
 
+  it('cites only pages on the official list', () => {
+    const questions = [
+      'what is my next step',
+      'how do I get a CPR number',
+      'MitID',
+      'is this landlord a scam',
+      'open a bank account',
+      'tax card',
+      'find a doctor',
+      'digital post',
+      'write to the kommune',
+      'can I get a student job',
+      'events this weekend',
+      'how do I meet people',
+      'learn danish',
+      'residence permit',
+      'what do I do in my first week',
+      'which documents should I bring',
+      'zzz',
+    ];
+    for (const q of questions)
+      for (const s of offlineAnswer(q, me, plan).sources) expect(isOfficial(s.url), `${q}: ${s.url}`).toBe(true);
+  });
+
+  it('walks through the first week, naming the local office', () => {
+    const res = offlineAnswer('What do I do in my first week?', me, plan);
+    expect(res.answer).toContain('CPR number');
+    expect(res.answer).toContain('International House Copenhagen');
+  });
+
+  it('lists the documents to bring', () => {
+    expect(offlineAnswer('Which documents should I bring?', me, plan).answer).toContain('passport');
+  });
+
+  it('gives the student work limit from the permit rules', () => {
+    expect(offlineAnswer('Can I get a student job?', me, plan).answer).toContain('90 hours a month');
+  });
+
   it('admits when it has no ready answer and points to the official guide', () => {
     const res = offlineAnswer('zzz qqq', me, plan);
     expect(res.offline).toBe(true);
@@ -100,10 +139,16 @@ describe('buildTurns', () => {
     expect(turns[0].role).toBe('user');
     expect(turns[0].content).toContain('You are Hej');
     expect(turns[0].content).toContain('reason for moving: Work');
-    expect(turns[0].content).toContain('- Register your EU residence: to do, Urgent');
+    expect(turns[0].content).toContain('- Get your EU registration certificate: to do, Urgent');
+    expect(turns[0].content).toContain('home: Looking for a home');
     expect(turns[0].content).toContain('locked until an earlier step is done');
     expect(turns[0].content).toContain('https://www.mitid.dk/en-gb/');
     expect(turns.at(-1)).toEqual({ role: 'user', content: 'Where do I register?' });
+  });
+
+  it('lists the events it is given, or says there are none', () => {
+    expect(buildTurns('q', [], me, plan, [event({ title: 'Harbour walk' })])[0].content).toContain('- Harbour walk (');
+    expect(buildTurns('q', [], me, plan)[0].content).toContain('- none listed');
   });
 
   it('includes only the last eight messages of history', () => {

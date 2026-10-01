@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { profile } from '../../tests/helpers.js';
-import { STEPS } from '../data/plan.js';
+import { CITY_OFFICES, STEPS } from '../data/plan.js';
 import type { PlanStep } from '../types.js';
+import { isOfficial } from './dom.js';
 import { appliesTo, currentPhase, journeyPhases, nextStep, planFor, planSummary, prio, stepOffice } from './plan.js';
 
 const slugs = (plan: PlanStep[]) => plan.map(s => s.slug);
@@ -13,19 +14,30 @@ const bySlug = (slug: string) => {
 const idOf = (slug: string) => bySlug(slug).id;
 
 describe('planFor', () => {
-  it('keeps only the steps that apply to a non-EU student without a CPR number', () => {
-    const plan = planFor(profile({ move_reason: 'student', residency_group: 'non-eu' }), new Set());
+  it('keeps only the steps that apply to a non-EU exchange student without a CPR number', () => {
+    const plan = planFor(
+      profile({ move_reason: 'student', residency_group: 'non-eu', study_type: 'exchange', job_status: null }),
+      new Set(),
+    );
     expect(slugs(plan)).toEqual([
       'residence-documents',
       'student-arrival',
       'housing',
       'cpr',
+      'health-card',
+      'mitid',
+      'digital-post',
+      'tax',
       'banking',
       'city-services',
+      'danish-classes',
+      'student-work',
+      'community',
+      'deposit',
     ]);
   });
 
-  it('swaps CPR-only steps in once someone has a CPR number', () => {
+  it('drops the CPR step once someone has a CPR number, and the steps behind it open up', () => {
     const plan = planFor(profile({ has_cpr: true }), new Set());
     expect(slugs(plan)).toEqual([
       'eu-residence',
@@ -37,7 +49,18 @@ describe('planFor', () => {
       'tax',
       'banking',
       'city-services',
+      'danish-classes',
+      'a-kasse',
+      'community',
+      'deposit',
     ]);
+    expect(plan.filter(s => s.locked).map(s => s.slug)).toEqual(['digital-post']);
+  });
+
+  it('adds steps for the situation: before arriving, a temporary home and children', () => {
+    const plan = slugs(planFor(profile({ stage: 'soon', housing: 'temporary', household: 'kids' }), new Set()));
+    expect(plan).toEqual(expect.arrayContaining(['documents', 'ehic', 'register-move', 'school-childcare']));
+    expect(slugs(planFor(profile({ housing: 'settled' }), new Set()))).not.toContain('housing');
   });
 
   it('locks steps behind an unfinished prerequisite that is in the plan', () => {
@@ -58,6 +81,20 @@ describe('planFor', () => {
   });
 });
 
+describe('official links', () => {
+  it('gives every step at least one link, all on the official list, so the Journey never hides them', () => {
+    for (const step of STEPS) {
+      expect(step.official_links.length, step.slug).toBeGreaterThan(0);
+      for (const l of step.official_links) expect(isOfficial(l.url), `${step.slug}: ${l.url}`).toBe(true);
+    }
+  });
+
+  it('links every citizen-service office to an official page', () => {
+    const offices = [...Object.values(CITY_OFFICES), ...STEPS.flatMap(s => Object.values(s.office_by_city))];
+    for (const office of offices) expect(isOfficial(office.url), office.name).toBe(true);
+  });
+});
+
 describe('appliesTo', () => {
   it('applies steps with no conditions to everyone', () => {
     expect(appliesTo(bySlug('housing'), profile({ move_reason: 'other', residency_group: 'non-eu' }))).toBe(true);
@@ -66,7 +103,9 @@ describe('appliesTo', () => {
   it('checks every condition on the step', () => {
     expect(appliesTo(bySlug('cpr'), profile({ has_cpr: false }))).toBe(true);
     expect(appliesTo(bySlug('cpr'), profile({ has_cpr: true }))).toBe(false);
-    expect(appliesTo(bySlug('tax'), profile({ move_reason: 'student' }))).toBe(false);
+    expect(appliesTo(bySlug('job-search'), profile({ job_status: 'offer' }))).toBe(false);
+    expect(appliesTo(bySlug('job-search'), profile({ job_status: 'looking' }))).toBe(true);
+    expect(appliesTo(bySlug('job-search'), profile({ move_reason: 'student', job_status: 'looking' }))).toBe(false);
   });
 });
 
@@ -85,9 +124,10 @@ describe('nextStep', () => {
     expect(nextStep(planFor(profile(), new Set()))?.slug).toBe('eu-residence');
   });
 
-  it('moves on as steps are completed and prefers Soon over Later', () => {
+  it('moves on as steps are completed and prefers Urgent over Soon', () => {
     const done = ids('eu-residence', 'housing', 'cpr');
-    expect(nextStep(planFor(profile(), done))?.slug).toBe('work-documents');
+    // MitID and tax are unlocked by CPR and both Urgent, so the earlier one wins over work documents (Soon).
+    expect(nextStep(planFor(profile(), done))?.slug).toBe('mitid');
   });
 
   it('skips locked steps', () => {
@@ -106,8 +146,8 @@ describe('nextStep', () => {
 describe('journeyPhases', () => {
   it('groups steps into phases in journey order and drops empty phases', () => {
     const phases = journeyPhases(planFor(profile(), new Set()));
-    expect(phases.map(p => p.id)).toEqual(['prepare', 'first-weeks', 'digital-life']);
-    expect(phases[0].steps.map(s => s.slug)).toEqual(['eu-residence', 'work-documents', 'housing']);
+    expect(phases.map(p => p.id)).toEqual(['prepare', 'first-weeks', 'digital-life', 'settle']);
+    expect(phases[0].steps.map(s => s.slug)).toEqual(['work-documents', 'housing', 'deposit']);
     expect(journeyPhases(planFor(profile(), new Set()).filter(s => s.slug === 'city-services')).map(p => p.id)).toEqual(
       ['first-weeks'],
     );
@@ -124,20 +164,23 @@ describe('journeyPhases', () => {
 
 describe('currentPhase and planSummary', () => {
   it('finds the first phase with work left', () => {
-    const plan = planFor(profile(), new Set([idOf('eu-residence'), idOf('work-documents'), idOf('housing')]));
+    const plan = planFor(
+      profile(),
+      new Set([idOf('eu-residence'), idOf('work-documents'), idOf('housing'), idOf('deposit')]),
+    );
     expect(currentPhase(plan)?.id).toBe('first-weeks');
   });
 
   it('falls back to the last phase when everything is done, and to null for an empty plan', () => {
     const all = planFor(profile(), new Set());
     const done = planFor(profile(), new Set(all.map(s => s.id)));
-    expect(currentPhase(done)?.id).toBe('digital-life');
+    expect(currentPhase(done)?.id).toBe('settle');
     expect(currentPhase([])).toBeNull();
   });
 
   it('summarises progress', () => {
     const summary = planSummary(planFor(profile(), new Set([idOf('eu-residence')])));
-    expect(summary).toMatchObject({ completed: 1, total: 7, percentage: 14 });
+    expect(summary).toMatchObject({ completed: 1, total: 14, percentage: 7 });
     expect(summary.nextStep?.slug).toBe('housing');
   });
 
