@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-02T11:05:57.057Z",
+  "generatedAt": "2026-10-03T10:23:56.647Z",
   "sources": [
     {
       "id": "dear-world",
@@ -34,21 +34,6 @@
     }
   ],
   "events": [
-    {
-      "id": "kk-libraries-7654aae9-dfa9-4e3c-aff5-1a4832520570",
-      "title": "Portugisiske Morgener på Vigerslev bibliotek",
-      "startsAt": "2026-10-03T08:00:00.000Z",
-      "endsAt": "2026-10-03T10:00:00.000Z",
-      "allDay": false,
-      "kind": "event",
-      "venue": "Vigerslev Bibliotek, Valby",
-      "city": "copenhagen",
-      "category": "learning",
-      "url": "https://bibliotek.kk.dk/vigerslev-bibliotek/arrangementer/faellesskaber/portugisiske-morgener-pa-vigerslev-bibliotek/2026-2",
-      "sourceId": "kk-libraries",
-      "sourceName": "Copenhagen Libraries",
-      "isFree": null
-    },
     {
       "id": "aarhus-libraries-78f725ab-ac8c-40f5-a2dc-9c6c61cb5ca4",
       "title": "Sprogcafé",
@@ -647,6 +632,21 @@
       "url": "https://www.meetup.com/copenhagen_expat_meetup/events/315733589/",
       "sourceId": "copenhagen-expat-meetup",
       "sourceName": "Copenhagen Expat Meetup",
+      "isFree": null
+    },
+    {
+      "id": "kk-libraries-8b8eacdd-ac35-42cd-9d0d-325d7b07b50a",
+      "title": "Portugisiske Morgener på Vigerslev bibliotek",
+      "startsAt": "2026-11-07T09:00:00.000Z",
+      "endsAt": "2026-11-07T11:00:00.000Z",
+      "allDay": false,
+      "kind": "event",
+      "venue": "Vigerslev Bibliotek, Valby",
+      "city": "copenhagen",
+      "category": "learning",
+      "url": "https://bibliotek.kk.dk/vigerslev-bibliotek/arrangementer/faellesskaber/portugisiske-morgener-pa-vigerslev-bibliotek/2026-3",
+      "sourceId": "kk-libraries",
+      "sourceName": "Copenhagen Libraries",
       "isFree": null
     },
     {
